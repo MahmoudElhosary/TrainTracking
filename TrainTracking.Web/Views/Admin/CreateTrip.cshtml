@@ -1,0 +1,98 @@
+@model TrainTracking.Domain.Entities.Trip
+@using TrainTracking.Domain.Entities
+@{
+    bool isEdit = Model?.Id != Guid.Empty && Model?.Id != null;
+    ViewData["Title"] = isEdit ? "تعديل رحلة" : "إضافة رحلة جديدة";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-primary text-white p-4">
+                    <h3 class="mb-0 fw-bold h4">
+                        <i class="fas @(isEdit ? "fa-edit" : "fa-plus-circle") me-2"></i> @ViewData["Title"]
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="@(isEdit ? "EditTrip" : "CreateTrip")" method="post">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        @if (isEdit)
+                        {
+                            <input type="hidden" asp-for="Id" />
+                        }
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="TrainId" class="form-label fw-bold">القطار</label>
+                                <select asp-for="TrainId" class="form-select rounded-3 border-light shadow-sm bg-light" required>
+                                    <option value="">اختر القطار...</option>
+                                    @foreach (var train in (List<Train>)ViewBag.Trains)
+                                    {
+                                        <option value="@train.Id">@train.TrainNumber (@train.Type)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Status" class="form-label fw-bold">حالة الرحلة</label>
+                                <select asp-for="Status" class="form-select rounded-3 border-light shadow-sm bg-light" asp-items="Html.GetEnumSelectList<TripStatus>()"></select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="FromStationId" class="form-label fw-bold">محطة المغادرة</label>
+                                <select asp-for="FromStationId" class="form-select rounded-3 border-light shadow-sm bg-light" required>
+                                    <option value="">اختر محطة...</option>
+                                    @foreach (var station in (List<Station>)ViewBag.Stations)
+                                    {
+                                        <option value="@station.Id">@station.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ToStationId" class="form-label fw-bold">محطة الوصول</label>
+                                <select asp-for="ToStationId" class="form-select rounded-3 border-light shadow-sm bg-light" required>
+                                    <option value="">اختر محطة...</option>
+                                    @foreach (var station in (List<Station>)ViewBag.Stations)
+                                    {
+                                        <option value="@station.Id">@station.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="DepartureTime" class="form-label fw-bold">تاريخ ووقت المغادرة</label>
+                                <input asp-for="DepartureTime" type="datetime-local" class="form-control rounded-3 border-light shadow-sm bg-light" required />
+                                <small class="text-muted">مثال: 2025-12-28 الساعة 14:30</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ArrivalTime" class="form-label fw-bold">تاريخ ووقت الوصول المتوقع</label>
+                                <input asp-for="ArrivalTime" type="datetime-local" class="form-control rounded-3 border-light shadow-sm bg-light" required />
+                                <small class="text-muted">مثال: 2025-12-28 الساعة 16:45</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="DelayMinutes" class="form-label fw-bold">تأخير (بالدقائق)</label>
+                            <input asp-for="DelayMinutes" class="form-control rounded-3 border-light shadow-sm bg-light" placeholder="0" />
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">
+                                <i class="fas fa-save me-2"></i> @(isEdit ? "حفظ التغييرات" : "إضافة الرحلة")
+                            </button>
+                            <a asp-action="Trips" class="btn btn-link text-decoration-none text-muted">إلغاء</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

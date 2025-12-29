@@ -1,0 +1,62 @@
+@model TrainTracking.Domain.Entities.Train
+@{
+    bool isEdit = Model?.Id != Guid.Empty && Model?.Id != null;
+    ViewData["Title"] = isEdit ? "تعديل قطار" : "إضافة قطار جديد";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-success text-white p-4">
+                    <h3 class="mb-0 fw-bold h4">
+                        <i class="fas @(isEdit ? "fa-edit" : "fa-plus-circle") me-2"></i> @ViewData["Title"]
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="@(isEdit ? "EditTrain" : "CreateTrain")" method="post">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        @if (isEdit)
+                        {
+                            <input type="hidden" asp-for="Id" />
+                        }
+
+                        <div class="mb-3">
+                            <label asp-for="TrainNumber" class="form-label fw-bold">رقم القطار</label>
+                            <input asp-for="TrainNumber" class="form-control rounded-3 border-light shadow-sm bg-light" placeholder="مثلاً: T100" required />
+                            <span asp-validation-for="TrainNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Type" class="form-label fw-bold">نوع القطار</label>
+                            <select asp-for="Type" class="form-select rounded-3 border-light shadow-sm bg-light" required>
+                                <option value="">اختر النوع...</option>
+                                <option value="Express">سريع (Express)</option>
+                                <option value="VIP">مميز (VIP)</option>
+                                <option value="Ordinary">عادي</option>
+                            </select>
+                            <span asp-validation-for="Type" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="TotalSeats" class="form-label fw-bold">إجمالي المقاعد</label>
+                            <input asp-for="TotalSeats" type="number" class="form-control rounded-3 border-light shadow-sm bg-light" min="1" required />
+                            <span asp-validation-for="TotalSeats" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success rounded-pill py-2 fw-bold shadow-sm">
+                                <i class="fas fa-save me-2"></i> @(isEdit ? "حفظ التغييرات" : "إضافة القطار")
+                            </button>
+                            <a asp-action="Trains" class="btn btn-link text-decoration-none text-muted">إلغاء</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

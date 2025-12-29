@@ -1,0 +1,89 @@
+@{
+    ViewData["Title"] = "لوحة التحكم";
+}
+
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="fw-bold text-dark mb-2">لوحة التحكم الإدارية</h1>
+            <p class="text-muted">إدارة الرحلات والقطارات والمحطات بكل سهولة</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Trips Management -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 hover-scale">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                        <i class="fas fa-route fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold h5">إدارة الرحلات</h3>
+                    <p class="text-muted small">إضافة وتعديل وحذف الرحلات القادمة وربطها بالقطارات.</p>
+                    <a asp-action="Trips" class="btn btn-primary rounded-pill px-4 mt-2">إدارة <i class="fas fa-arrow-left ms-2"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trains Management -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 hover-scale">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-success bg-opacity-10 text-success rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                        <i class="fas fa-train fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold h5">إدارة القطارات</h3>
+                    <p class="text-muted small">إدارة أسطول القطارات، أنواعها، وسعة المقاعد.</p>
+                    <a asp-action="Trains" class="btn btn-success rounded-pill px-4 mt-2">إدارة <i class="fas fa-arrow-left ms-2"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stations Management -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 hover-scale">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-warning bg-opacity-10 text-warning rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                        <i class="fas fa-city fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold h5">إدارة المحطات</h3>
+                    <p class="text-muted small">إضافة المحطات الجديدة وتعديل مواقعها الجغرافية.</p>
+                    <a asp-action="Stations" class="btn btn-warning rounded-pill px-4 mt-2">إدارة <i class="fas fa-arrow-left ms-2"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulator -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 hover-scale border-warning border-opacity-25 bg-light">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-dark bg-opacity-10 text-dark rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                        <i class="fas fa-gamepad fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold h5">محاكي الحركة</h3>
+                    <p class="text-muted small">اختبار تتبع القطارات بشكل حي وتغيير مواقعها يدوياً.</p>
+                    <a asp-action="Simulator" class="btn btn-dark rounded-pill px-4 mt-2">تشغيل المحاكي <i class="fas fa-satellite-dish ms-2"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Log -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 hover-scale bg-white">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-danger bg-opacity-10 text-danger rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                        <i class="fas fa-bell fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold h5">سجل التنبيهات</h3>
+                    <p class="text-muted small">مشاهدة تاريخ الرسائل والتنبيهات التي تم إرسالها للمسافرين.</p>
+                    <a asp-action="Notifications" class="btn btn-danger rounded-pill px-4 mt-2">السجل <i class="fas fa-history ms-2"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-scale { transition: transform 0.3s ease; }
+    .hover-scale:hover { transform: translateY(-5px); }
+</style>

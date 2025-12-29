@@ -1,0 +1,328 @@
+﻿@model TrainTracking.Domain.Entities.Booking
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Payment Gateway</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #005eb8;
+            --soft-blue: #f0f7ff;
+            --text-dark: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-radius: 12px;
+            --shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        body {
+            background-color: #f4f7f9;
+            background-image: url('/images/payment_bg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            padding: 30px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .brand-logo {
+            height: 50px;
+            margin-bottom: 10px;
+        }
+
+        .order-summary {
+            background: var(--soft-blue);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+            .summary-item .label {
+                color: var(--text-muted);
+            }
+
+            .summary-item .value {
+                color: var(--text-dark);
+                font-weight: 700;
+            }
+
+        .total-amount {
+            font-size: 18px;
+            color: var(--primary-blue) !important;
+        }
+
+        /* Apple Pay Section */
+        .apple-pay-container {
+            margin-bottom: 25px;
+        }
+
+        .apple-pay-button {
+            background: #000;
+            color: white;
+            width: 100%;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+        }
+
+            .apple-pay-button:hover {
+                opacity: 0.9;
+            }
+
+        .or-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--text-muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+            .or-divider::before, .or-divider::after {
+                content: '';
+                flex: 1;
+                border-bottom: 1px solid #eee;
+            }
+
+            .or-divider:not(:empty)::before {
+                margin-right: 15px;
+            }
+
+            .or-divider:not(:empty)::after {
+                margin-left: 15px;
+            }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+            .form-group label {
+                display: block;
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--text-dark);
+                margin-bottom: 8px;
+            }
+
+        .input-style {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #e1e8ee;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+            .input-style:focus {
+                outline: none;
+                border-color: var(--primary-blue);
+            }
+
+        .row-flex {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+            .btn-submit:hover {
+                background-color: #004a91;
+            }
+
+        .btn-cancel {
+            background-color: #f8f9fa;
+            color: var(--text-muted);
+            text-decoration: none;
+            text-align: center;
+        }
+
+            .btn-cancel:hover {
+                background-color: #eee;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="header">
+            <img src="/images/logo.png" class="brand-logo" alt="KuwGo" style="height: 70px;">
+        </div>
+
+        <div class="order-summary">
+            <div class="summary-item">
+                <span class="label">Merchant</span>
+                <span class="value">KuwGo Railways</span>
+            </div>
+            <div class="summary-item">
+                <span class="label">Total Amount</span>
+                <span class="value total-amount">KD @Model.Price.ToString("F3")</span>
+            </div>
+        </div>
+
+        <form asp-action="ProcessPayment" method="post" id="applePayForm">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" name="paymentMethod" value="ApplePay" />
+            <button type="button" class="apple-pay-button" onclick="confirmApplePay()">
+                <i class="fab fa-apple fa-lg" style="margin-right: 8px;"></i> Pay with Apple Pay
+            </button>
+        </form>
+
+        <div class="or-divider">Or pay with K-NET</div>
+
+        <form asp-action="ProcessPayment" method="post" id="paymentForm">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" name="paymentMethod" value="KNET" />
+
+            <div class="form-group">
+                <label>Select Your Bank</label>
+                <select class="input-style" name="bank" id="bankSelect" required onchange="updatePrefixes()">
+                    <option value="" disabled selected>Choose your bank</option>
+                    <option value="KFH">Kuwait Finance House [KFH]</option>
+                    <option value="NBK">National Bank of Kuwait [NBK]</option>
+                    <option value="Boubyan">Boubyan Bank</option>
+                    <option value="Gulf">Gulf Bank</option>
+                    <option value="Burgan">Burgan Bank</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Card Number</label>
+                <div class="row-flex">
+                    <select class="input-style" id="prefixSelect" name="cardPrefix" style="width: 120px; background-color: #f8f9fa;">
+                        <option value="">Prefix</option>
+                    </select>
+                    <input type="text" class="input-style" name="cardNumber" placeholder="000000" maxlength="10" required>
+                </div>
+            </div>
+
+            <div class="row-flex">
+                <div class="form-group" style="flex: 2;">
+                    <label>Expiration Date</label>
+                    <div class="row-flex">
+                        <select class="input-style" name="expMonth" required>
+                            <option value="" disabled selected>MM</option>
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                <option value="@i.ToString("00")">@i.ToString("00")</option>
+                            }
+                        </select>
+                        <select class="input-style" name="expYear" required>
+                            <option value="" disabled selected>YYYY</option>
+                            @for (int i = 0; i < 10; i++)
+                            {
+                                var year = DateTime.Now.Year + i;
+                                <option value="@year">@year</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>PIN</label>
+                    <input type="password" class="input-style" name="pin" placeholder="****" maxlength="4" required>
+                </div>
+            </div>
+
+            <div asp-validation-summary="All" style="color: red; font-size: 12px; margin-top: 10px;"></div>
+
+            <div class="action-buttons">
+                <a asp-action="MyBookings" class="btn btn-cancel">Cancel</a>
+                <button type="submit" class="btn btn-submit">Pay Now</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const bankPrefixes = {
+            'KFH': ['537016', '450778', '405469'],
+            'NBK': ['448332', '521175', '450238'],
+            'Boubyan': ['402978', '432672', '559400'],
+            'Gulf': ['516997', '521175', '531471'],
+            'Burgan': ['402978', '428805']
+        };
+
+        function updatePrefixes() {
+            const bankSelect = document.getElementById('bankSelect');
+            const prefixSelect = document.getElementById('prefixSelect');
+            const selectedBank = bankSelect.value;
+            prefixSelect.innerHTML = '';
+            if (selectedBank && bankPrefixes[selectedBank]) {
+                bankPrefixes[selectedBank].forEach(prefix => {
+                    const option = document.createElement('option');
+                    option.value = prefix;
+                    option.text = prefix;
+                    prefixSelect.appendChild(option);
+                });
+            }
+        }
+
+        function  confirmApplePay() {
+             document.getElementById('applePayForm').submit();
+        }
+    </script>
+</body>
+</html>

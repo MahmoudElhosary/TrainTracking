@@ -1,0 +1,108 @@
+@model List<TrainTracking.Domain.Entities.Booking>
+@using TrainTracking.Domain.Enums
+
+@{
+    ViewData["Title"] = "حجوزاتي";
+    var activeBookings = Model.Where(b => b.Status == BookingStatus.Confirmed).ToList();
+    var cancelledBookings = Model.Where(b => b.Status == BookingStatus.Cancelled).ToList();
+    var allBookings = Model.ToList();
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark mb-0">
+            <i class="fas fa-ticket-alt text-primary me-2"></i> حجوزاتي
+        </h2>
+        <a asp-controller="Trips" asp-action="Index" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">
+            <i class="fas fa-plus me-1"></i> حجز رحلة جديدة
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
+            <div class="mb-4">
+                <i class="fas fa-ticket-alt fa-4x text-muted opacity-25"></i>
+            </div>
+            <h4 class="fw-bold">لا يوجد حجوزات حالية</h4>
+            <p class="text-muted">لم تقم بحجز أي رحلات بعد. ابحث عن رحلة وابدأ سفرك معنا!</p>
+            <div class="mt-3">
+                <a asp-controller="Trips" asp-action="Index" class="btn btn-primary rounded-pill px-4">استعرض الرحلات</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Tabs for filtering -->
+        <ul class="nav nav-pills mb-4 bg-light rounded-pill p-2 shadow-sm" id="bookingTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active rounded-pill px-4 fw-bold" id="all-tab" data-bs-toggle="pill" data-bs-target="#all" type="button" role="tab">
+                    الكل (@allBookings.Count)
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-4 fw-bold" id="active-tab" data-bs-toggle="pill" data-bs-target="#active" type="button" role="tab">
+                    النشطة (@activeBookings.Count)
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-4 fw-bold" id="cancelled-tab" data-bs-toggle="pill" data-bs-target="#cancelled" type="button" role="tab">
+                    الملغية (@cancelledBookings.Count)
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="bookingTabsContent">
+            <!-- All Bookings -->
+            <div class="tab-pane fade show active" id="all" role="tabpanel">
+                @await Html.PartialAsync("_BookingCards", allBookings)
+            </div>
+
+            <!-- Active Bookings -->
+            <div class="tab-pane fade" id="active" role="tabpanel">
+                @if (!activeBookings.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+                        <p>لا توجد حجوزات نشطة</p>
+                    </div>
+                }
+                else
+                {
+                    @await Html.PartialAsync("_BookingCards", activeBookings)
+                }
+            </div>
+
+            <!-- Cancelled Bookings -->
+            <div class="tab-pane fade" id="cancelled" role="tabpanel">
+                @if (!cancelledBookings.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+                        <p>لا توجد حجوزات ملغية</p>
+                    </div>
+                }
+                else
+                {
+                    @await Html.PartialAsync("_BookingCards", cancelledBookings)
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .nav-pills .nav-link {
+        color: #6c757d;
+        transition: all 0.3s ease;
+    }
+    .nav-pills .nav-link.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    .nav-pills .nav-link:hover:not(.active) {
+        background-color: #e9ecef;
+    }
+</style>

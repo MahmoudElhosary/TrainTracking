@@ -1,0 +1,223 @@
+@model TrainTracking.Domain.Entities.Booking
+
+@{
+    ViewData["Title"] = "حجز رحلة";
+    var takenSeats = (List<int>)ViewBag.TakenSeats ?? new List<int>();
+    var totalSeats = Model.Trip?.Train?.TotalSeats ?? 40;
+    int seatsPerCoach = 20; // Each coach has 20 seats
+    int numberOfCoaches = (int)Math.Ceiling((double)totalSeats / seatsPerCoach);
+}
+
+<style>
+    .train-container {
+        max-height: 600px;
+        overflow-y: auto;
+        padding: 20px;
+        background: #f0f2f5;
+        border-radius: 20px;
+    }
+
+    .coach {
+        background: white;
+        border: 2px solid #dee2e6;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        padding: 20px;
+        position: relative;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .coach::before, .coach::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        width: 40px;
+        height: 10px;
+        background: #adb5bd;
+        transform: translateX(-50%);
+    }
+
+    .coach::before { top: -12px; border-radius: 5px 5px 0 0; }
+    .coach::after { bottom: -12px; border-radius: 0 0 5px 5px; }
+
+    .coach-header {
+        text-align: center;
+        margin-bottom: 15px;
+        color: #6c757d;
+        font-weight: bold;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .seat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr) 40px repeat(2, 1fr);
+        gap: 10px;
+        justify-items: center;
+    }
+
+    .aisle {
+        grid-column: 3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #dee2e6;
+        font-size: 0.8rem;
+    }
+
+    .seat {
+        width: 45px;
+        height: 45px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 600;
+        background: #fff;
+        font-size: 0.9rem;
+    }
+
+    .seat:hover:not(.taken) {
+        border-color: #0d6efd;
+        color: #0d6efd;
+        background: #f0f7ff;
+        transform: scale(1.1);
+    }
+
+    .seat.selected {
+        background: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+        box-shadow: 0 0 10px rgba(13, 110, 253, 0.4);
+    }
+
+    .seat.taken {
+        background: #f8f9fa;
+        color: #dee2e6;
+        cursor: not-allowed;
+        border-style: dashed;
+    }
+
+    .legend {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        padding: 15px;
+        background: white;
+        border-radius: 50px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+    .dot { width: 14px; height: 14px; border-radius: 4px; }
+</style>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-11">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-dark text-white p-4 d-flex align-items-center justify-content-between">
+                    <h2 class="h4 mb-0 fw-bold"><i class="fas fa-couch me-2 text-warning"></i> حجز المقاعد - التصميم الواقعي</h2>
+                    <span class="badge bg-warning text-dark rounded-pill px-3">الرحلة: @(Model.Trip?.Train?.TrainNumber ?? "---")</span>
+                </div>
+                <div class="card-body p-4 bg-light">
+                    <div class="row">
+                        <!-- Sidebar: Booking Info -->
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                                <h5 class="fw-bold mb-4 border-bottom pb-2">بيانات الحجز</h5>
+                                <form asp-action="Create" id="bookingForm">
+                                    <input type="hidden" asp-for="TripId" />
+                                    <input type="hidden" asp-for="Price" />
+                                    <input type="hidden" asp-for="SeatNumber" id="selectedSeatInput" />
+
+                                    <div class="mb-3">
+                                        <label asp-for="PassengerName" class="form-label small fw-bold text-muted">اسم المسافر</label>
+                                        <input asp-for="PassengerName" class="form-control rounded-3 bg-light border-0 shadow-sm" placeholder="الاسم الكامل" required />
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label asp-for="PassengerPhone" class="form-label small fw-bold text-muted">رقم الهاتف</label>
+                                        <input asp-for="PassengerPhone" class="form-control rounded-3 bg-light border-0 shadow-sm" placeholder="965XXXXXXXX" required />
+                                    </div>
+
+                                    <div class="p-4 bg-primary bg-opacity-10 rounded-4 mb-4 text-center">
+                                        <div class="text-muted small mb-1">المقعد المختار</div>
+                                        <h3 class="fw-bold text-primary mb-0" id="seatDisplay">--</h3>
+                                        <div class="mt-2 text-dark fw-bold">السعر: @Model.Price د.ك</div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow mt-2" id="submitBtn" disabled>
+                                        <i class="fas fa-check-circle me-2"></i> تأكيد وحجز التذكرة
+                                    </button>
+                                </form>
+                                <div class="mt-4 text-center">
+                                    <a asp-controller="Trips" asp-action="Index" class="btn btn-link text-muted text-decoration-none small">
+                                        <i class="fas fa-arrow-right me-1"></i> العودة للرحلات
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main: Coach Layout -->
+                        <div class="col-md-8">
+                            <div class="legend">
+                                <div class="legend-item"><div class="dot" style="background: white; border: 2px solid #e9ecef;"></div> متاح</div>
+                                <div class="legend-item"><div class="dot" style="background: #0d6efd;"></div> مختار</div>
+                                <div class="legend-item"><div class="dot" style="background: #f8f9fa; border: 2px dashed #dee2e6;"></div> محجوز</div>
+                            </div>
+
+                            <div class="train-container">
+                                @for (int c = 0; c < 10; c++) // Requesting 10 coaches
+                                {
+                                    <div class="coach">
+                                        <div class="coach-header">العربة رقم @(c + 1)</div>
+                                        <div class="seat-grid">
+                                            @for (int s = 1; s <= 20; s++)
+                                            {
+                                                int seatNum = (c * 20) + s;
+                                                bool isTaken = takenSeats.Contains(seatNum);
+                                                
+                                                <div class="seat @(isTaken ? "taken" : "")" 
+                                                     data-seat="@seatNum" 
+                                                     onclick="@(isTaken ? "" : $"selectSeat({seatNum})")">
+                                                    @seatNum
+                                                </div>
+
+                                                // Add aisle after every 2nd seat in a row
+                                                if (s % 2 == 0 && s % 4 != 0)
+                                                {
+                                                    <div class="aisle"><i class="fas fa-ellipsis-v"></i></div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function selectSeat(num) {
+            document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected'));
+            const seatEl = document.querySelector(`.seat[data-seat="${num}"]`);
+            seatEl.classList.add('selected');
+            
+            document.getElementById('selectedSeatInput').value = num;
+            document.getElementById('seatDisplay').innerText = "مقعد " + num;
+            document.getElementById('submitBtn').disabled = false;
+        }
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

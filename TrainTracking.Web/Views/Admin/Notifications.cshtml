@@ -1,0 +1,58 @@
+@model IEnumerable<TrainTracking.Domain.Entities.Notification>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "سجل التنبيهات الذكية";
+}
+
+<div class="container py-5">
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-dark text-white p-4">
+            <h4 class="mb-0"><i class="fas fa-history me-2"></i> سجل التنبيهات المرسلة</h4>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="px-4 py-3">المستلم</th>
+                            <th class="px-4 py-3">النوع</th>
+                            <th class="px-4 py-3">الرسالة</th>
+                            <th class="px-4 py-3">الوقت</th>
+                            <th class="px-4 py-3 text-center">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="px-4 py-3 fw-bold">@item.Recipient</td>
+                                <td class="px-4 py-3">
+                                    <span class="badge bg-secondary rounded-pill">@item.Type</span>
+                                </td>
+                                <td class="px-4 py-3 text-muted small" style="max-width: 300px;">@item.Message</td>
+                                <td class="px-4 py-3">@item.SentAt.ToString("yyyy/MM/dd HH:mm")</td>
+                                <td class="px-4 py-3 text-center">
+                                    @if (item.IsSent)
+                                    {
+                                        <span class="badge bg-success rounded-pill"><i class="fas fa-check-circle me-1"></i> نجاح</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger rounded-pill" title="@item.ErrorMessage"><i class="fas fa-times-circle me-1"></i> فشل</span>
+                                        <div class="x-small text-danger mt-1" style="font-size: 0.7rem;">@item.ErrorMessage</div>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">لا يوجد سجل تنبيهات حتى الآن.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

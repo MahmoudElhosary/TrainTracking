@@ -1,0 +1,58 @@
+@model TrainTracking.Domain.Entities.Station
+@{
+    bool isEdit = Model?.Id != Guid.Empty && Model?.Id != null;
+    ViewData["Title"] = isEdit ? "تعديل محطة" : "إضافة محطة جديدة";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-warning text-dark p-4">
+                    <h3 class="mb-0 fw-bold h4">
+                        <i class="fas @(isEdit ? "fa-edit" : "fa-plus-circle") me-2"></i> @ViewData["Title"]
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="@(isEdit ? "EditStation" : "CreateStation")" method="post">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        @if (isEdit)
+                        {
+                            <input type="hidden" asp-for="Id" />
+                        }
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-bold">اسم المحطة</label>
+                            <input asp-for="Name" class="form-control rounded-3 border-light shadow-sm bg-light" placeholder="مثلاً: الكويت" required />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Latitude" class="form-label fw-bold">خط العرض (Latitude)</label>
+                                <input asp-for="Latitude" type="number" step="any" class="form-control rounded-3 border-light shadow-sm bg-light" required />
+                                <span asp-validation-for="Latitude" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Longitude" class="form-label fw-bold">خط الطول (Longitude)</label>
+                                <input asp-for="Longitude" type="number" step="any" class="form-control rounded-3 border-light shadow-sm bg-light" required />
+                                <span asp-validation-for="Longitude" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-2">
+                            <button type="submit" class="btn btn-warning rounded-pill py-2 fw-bold shadow-sm">
+                                <i class="fas fa-save me-2"></i> @(isEdit ? "حفظ التغييرات" : "إضافة المحطة")
+                            </button>
+                            <a asp-action="Stations" class="btn btn-link text-decoration-none text-muted">إلغاء</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,401 @@
+@model List<TrainTracking.Domain.Entities.Trip>
+@{
+    ViewData["Title"] = "الرحلات القادمة";
+}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map { height: 500px; width: 100%; border-radius: 12px; }
+    .leaflet-popup-content { font-family: 'Cairo', sans-serif; text-align: center; }
+</style>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-primary text-white p-4 d-flex align-items-center justify-content-between gradient-header">
+                    <h2 class="mb-0 fw-bold fs-4"><i class="fas fa-train me-2"></i> الرحلات القادمة</h2>
+                    <div>
+                        <a href="#" class="btn btn-light btn-sm rounded-pill fw-bold text-primary shadow-sm hover-scale me-2" data-bs-toggle="modal" data-bs-target="#mapModal">
+                            <i class="fas fa-map-marked-alt me-1"></i> عرض الخريطة
+                        </a>
+                        <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-2 fs-6 backdrop-blur">
+                            <i class="far fa-calendar-alt me-1"></i> @DateTime.Now.ToString("dd MMMM yyyy")
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Search Section -->
+                    <div class="bg-light border-bottom p-4">
+                        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-muted">من محطة</label>
+                                <select name="fromStationId" class="form-select rounded-pill border-0 shadow-sm">
+                                    <option value="">كل المحطات</option>
+                                    @foreach (var station in (ViewBag.Stations as IEnumerable<TrainTracking.Domain.Entities.Station>) ?? Enumerable.Empty<TrainTracking.Domain.Entities.Station>())
+                                    {
+                                        <option value="@station.Id" selected="@(ViewBag.FromStationId?.ToString() == station.Id.ToString() ? "selected" : null)">@station.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-muted">إلى محطة</label>
+                                <select name="toStationId" class="form-select rounded-pill border-0 shadow-sm">
+                                    <option value="">كل المحطات</option>
+                                    @foreach (var station in (ViewBag.Stations as IEnumerable<TrainTracking.Domain.Entities.Station>) ?? Enumerable.Empty<TrainTracking.Domain.Entities.Station>())
+                                    {
+                                        <option value="@station.Id" selected="@(ViewBag.ToStationId?.ToString() == station.Id.ToString() ? "selected" : null)">@station.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold text-muted">التاريخ</label>
+                                <input type="date" name="date" value="@ViewBag.Date" class="form-control rounded-pill border-0 shadow-sm" />
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary rounded-pill w-100 fw-bold shadow-sm">
+                                    <i class="fas fa-search me-2"></i> بحث التوفر
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Desktop Table View -->
+                    <div class="table-responsive d-none d-md-block">
+                        <table class="table table-hover align-middle mb-0 custom-table">
+                            <thead class="bg-light border-bottom">
+                                <tr class="text-secondary fs-7">
+                                    <th class="py-3 px-4">القطار</th>
+                                    <th class="py-3 px-4">المسار</th>
+                                    <th class="py-3 px-4">الموعد</th>
+                                    <th class="py-3 px-4 text-center">الحالة</th>
+                                    <th class="py-3 px-4 text-center">التأخير</th>
+                                    <th class="py-3 px-4 text-center">إجراءات</th> 
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var trip in Model)
+                                {
+                                    var statusClass = trip.Status switch
+                                    {
+                                        TrainTracking.Domain.Entities.TripStatus.OnTime => "success",
+                                        TrainTracking.Domain.Entities.TripStatus.Delayed => "danger",
+                                        TrainTracking.Domain.Entities.TripStatus.Scheduled => "primary",
+                                        _ => "warning"
+                                    };
+                                    var statusText = trip.Status switch
+                                    {
+                                        TrainTracking.Domain.Entities.TripStatus.OnTime => "في الموعد",
+                                        TrainTracking.Domain.Entities.TripStatus.Delayed => "متأخر",
+                                        TrainTracking.Domain.Entities.TripStatus.Scheduled => "مجدول",
+                                        _ => trip.Status.ToString()
+                                    };
+                                    <tr class="border-bottom" id="trip-@trip.Id">
+                                        <td class="px-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="icon-square bg-light text-primary rounded-3 ms-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; min-width: 48px;">
+                                                    <i class="fas fa-subway fs-5"></i>
+                                                </div>
+                                                <div>
+                                                    <a asp-action="Details" asp-route-id="@trip.Id" class="fw-bold text-dark fs-6 text-decoration-none" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">@(trip.Train?.TrainNumber ?? "N/A")</a>
+                                                    <div class="small text-muted">@(trip.Train?.Type ?? "Unknown")</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="d-flex flex-column">
+                                                <div class="mb-1 d-flex align-items-center">
+                                                    <i class="fas fa-circle text-success me-2" style="font-size: 8px;"></i>
+                                                    <span class="fw-semibold">@(trip.FromStation?.Name ?? "غير محدد")</span>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-circle text-danger me-2" style="font-size: 8px;"></i>
+                                                    <span class="text-muted">@(trip.ToStation?.Name ?? "غير محدد")</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-dark fs-5" style="letter-spacing: 0.5px;">
+                                                    @trip.DepartureTime.ToString("HH:mm")
+                                                </span>
+                                                <span class="small text-muted">
+                                                    <i class="fas fa-arrow-left me-1 ms-1 text-primary small"></i>
+                                                    @trip.ArrivalTime.ToString("HH:mm")
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <span class="badge bg-soft-@statusClass text-@statusClass rounded-pill px-3 py-2 border border-@statusClass border-opacity-25 status-badge">
+                                                @statusText
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center delay-cell">
+                                            @if (trip.DelayMinutes.HasValue && trip.DelayMinutes > 0)
+                                            {
+                                                <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1 rounded-2">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i> +@trip.DelayMinutes دقيقة
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-success small"><i class="fas fa-check-circle"></i> لا يوجد</span>
+                                            }
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            @if (trip.Status == TripStatus.Cancelled || trip.Status == TripStatus.Completed)
+                                            {
+                                                <button class="btn btn-secondary btn-sm rounded-pill px-4 shadow-sm fw-bold opacity-50" disabled style="cursor: not-allowed;">
+                                                    <i class="fas fa-ban me-1"></i> غير متاح
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <a asp-controller="Bookings" asp-action="Create" asp-route-id="@trip.Id" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm fw-bold">
+                                                    <i class="fas fa-ticket-alt me-1"></i> احجز الآن
+                                                </a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Card View -->
+                    <div class="d-md-none bg-light p-3">
+                        @foreach (var trip in Model)
+                        {
+                            var statusClass = trip.Status switch
+                            {
+                                TrainTracking.Domain.Entities.TripStatus.OnTime => "success",
+                                TrainTracking.Domain.Entities.TripStatus.Delayed => "danger",
+                                TrainTracking.Domain.Entities.TripStatus.Scheduled => "primary",
+                                _ => "warning"
+                            };
+                            var statusText = trip.Status switch
+                            {
+                                TrainTracking.Domain.Entities.TripStatus.OnTime => "في الموعد",
+                                TrainTracking.Domain.Entities.TripStatus.Delayed => "متأخر",
+                                TrainTracking.Domain.Entities.TripStatus.Scheduled => "مجدول",
+                                _ => trip.Status.ToString()
+                            };
+                            
+                            <div class="card mb-3 border-0 shadow-sm rounded-4 overflow-hidden">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-2 ms-2">
+                                                <i class="fas fa-train fs-5"></i>
+                                            </div>
+                                            <span class="fw-bold fs-5">@trip.Train.TrainNumber</span>
+                                        </div>
+                                        <span class="badge bg-soft-@statusClass text-@statusClass rounded-pill px-3 py-2">
+                                            @statusText
+                                        </span>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">من</small>
+                                            <span class="fw-bold">@trip.FromStation.Name</span>
+                                            <div class="text-primary fw-bold">@trip.DepartureTime.ToString("HH:mm")</div>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <small class="text-muted d-block">إلى</small>
+                                            <span class="fw-bold">@trip.ToStation.Name</span>
+                                            <div class="text-muted small">@trip.ArrivalTime.ToString("HH:mm")</div>
+                                        </div>
+                                    </div>
+
+                                    @if (trip.DelayMinutes.HasValue && trip.DelayMinutes > 0)
+                                    {
+                                        <div class="alert alert-danger py-2 px-3 mb-3 d-flex align-items-center small bg-opacity-10 border-0 text-danger rounded-3">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <strong>تأخير:</strong>&nbsp;@trip.DelayMinutes دقيقة
+                                        </div>
+                                    }
+
+                                    <div class="d-grid">
+                                        @if (trip.Status == TripStatus.Cancelled || trip.Status == TripStatus.Completed)
+                                        {
+                                            <button class="btn btn-secondary rounded-pill fw-bold opacity-50" disabled>
+                                                <i class="fas fa-ban me-1"></i> غير متاح
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <a asp-controller="Bookings" asp-action="Create" asp-route-id="@trip.Id" class="btn btn-primary rounded-pill fw-bold shadow-sm">
+                                                <i class="fas fa-ticket-alt me-1"></i> احجز الآن
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="card-footer bg-light p-3 text-center text-muted small border-top-0 d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-sync-alt me-1"></i> يتم التحديث تلقائياً</span>
+                    <span>آخر تحديث: <span id="last-updated">@DateTime.Now.ToString("HH:mm:ss")</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Map Modal -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header bg-primary text-white p-4">
+                <h5 class="modal-title fw-bold" id="mapModalLabel"><i class="fas fa-map-marked-alt me-2"></i> خريطة محطات القطار</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="map"></div>
+            </div>
+            <div class="modal-footer bg-light p-3">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        // Connect to SignalR Hub
+        var connection = new signalR.HubConnectionBuilder().withUrl("/tripHub").build();
+        // Listen for TripUpdated event
+        connection.on("TripUpdated", function (trip) {
+            console.log("Update received:", trip);
+
+            var row = document.getElementById("trip-" + trip.id);
+            if (row) {
+                // Update Status Badge
+                var statusBadge = row.querySelector(".status-badge");
+                if (statusBadge) {
+                    statusBadge.className = `badge bg-soft-${trip.statusClass} text-${trip.statusClass} rounded-pill px-3 py-2 border border-${trip.statusClass} border-opacity-25 status-badge`;
+                    statusBadge.innerText = trip.statusText;
+                }
+                // Update Delay Cell
+                var delayCell = row.querySelector(".delay-cell");
+                if (delayCell) {
+                    if (trip.delayMinutes && trip.delayMinutes > 0) {
+                        delayCell.innerHTML = `
+                            <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1 rounded-2">
+                                <i class="fas fa-exclamation-triangle me-1"></i> +${trip.delayMinutes} دقيقة
+                            </span>`;
+                    } else {
+                        delayCell.innerHTML = `<span class="text-success small"><i class="fas fa-check-circle"></i> لا يوجد</span>`;
+                    }
+                }
+
+                // Highlight the row visually
+                row.classList.remove("updated-row");
+                void row.offsetWidth; // trigger reflow
+                row.classList.add("updated-row");
+
+                // Update "Last Updated" time
+                var now = new Date();
+                document.getElementById("last-updated").innerText = now.toLocaleTimeString('en-US', { hour12: false });
+            }
+        });
+        connection.start().then(function () {
+            console.log("SignalR Connected!");
+        }).catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        // Map Initialization
+        var map;
+        var mapModal = document.getElementById('mapModal');
+        var markers = {}; // To store train markers by TripId
+        var polylines = [];
+        
+        mapModal.addEventListener('shown.bs.modal', function () {
+            if (!map) {
+                map = L.map('map').setView([29.3759, 47.9774], 10);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+            }
+            
+            // Clear existing layers if any (except tileLayer)
+            polylines.forEach(p => map.removeLayer(p));
+            polylines = [];
+            for (var id in markers) { map.removeLayer(markers[id]); }
+            markers = {};
+
+            // Get Trip data for simulation
+            var trips = @(Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Select(t => new {
+                id = t.Id,
+                from = new { name = t.FromStation?.Name, lat = t.FromStation?.Latitude ?? 0, lng = t.FromStation?.Longitude ?? 0 },
+                to = new { name = t.ToStation?.Name, lat = t.ToStation?.Latitude ?? 0, lng = t.ToStation?.Longitude ?? 0 },
+                departure = t.DepartureTime.ToUnixTimeMilliseconds(),
+                arrival = t.ArrivalTime.ToUnixTimeMilliseconds(),
+                trainNumber = t.Train.TrainNumber
+            }))));
+
+            var trainIcon = L.divIcon({
+                html: '<i class="fas fa-train text-primary fs-4" style="text-shadow: 0 0 5px white;"></i>',
+                className: 'train-moving-icon',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+
+            function updateTrainPositions() {
+                var now = Date.now();
+                trips.forEach(function(trip) {
+                    var progress = (now - trip.departure) / (trip.arrival - trip.departure);
+                    
+                    // Only show if the trip is currently active or about to start/just finished
+                    if (progress >= 0 && progress <= 1) {
+                        var currentLat = trip.from.lat + (trip.to.lat - trip.from.lat) * progress;
+                        var currentLng = trip.from.lng + (trip.to.lng - trip.from.lng) * progress;
+
+                        if (!markers[trip.id]) {
+                            markers[trip.id] = L.marker([currentLat, currentLng], { icon: trainIcon })
+                                .addTo(map)
+                                .bindPopup(`<b>قطار ${trip.trainNumber}</b><br>متجه إلى: ${trip.to.name}`);
+                            
+                            // Draw path
+                            var path = L.polyline([[trip.from.lat, trip.from.lng], [trip.to.lat, trip.to.lng]], {
+                                color: '#3498db',
+                                weight: 3,
+                                opacity: 0.5,
+                                dashArray: '5, 10'
+                            }).addTo(map);
+                            polylines.push(path);
+                        } else {
+                            markers[trip.id].setLatLng([currentLat, currentLng]);
+                        }
+                    } else if (progress > 1 && markers[trip.id]) {
+                        // Trip finished
+                        map.removeLayer(markers[trip.id]);
+                        delete markers[trip.id];
+                    }
+                });
+            }
+
+            // Initial call and set interval
+            updateTrainPositions();
+            setInterval(updateTrainPositions, 2000);
+
+            // Add static station markers
+            var stations = {};
+            trips.forEach(t => {
+                stations[t.from.name] = [t.from.lat, t.from.lng];
+                stations[t.to.name] = [t.to.lat, t.to.lng];
+            });
+            for (var name in stations) {
+                L.circleMarker(stations[name], { radius: 5, color: '#f39c12', fillOpacity: 0.8 })
+                    .addTo(map)
+                    .bindPopup(`<b>محطة ${name}</b>`);
+            }
+
+            map.invalidateSize();
+        });
+    </script>
+}

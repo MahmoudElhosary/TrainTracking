@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - KuwGo</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TrainTracking.Web.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f8f9fa; }
+        .navbar-custom { background-color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05) !important; padding: 0.5rem 0; }
+        .nav-link { 
+            color: #555 !important; 
+            font-weight: 600; 
+            border-radius: 50px; 
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-link:hover { 
+            color: #005eb8 !important; 
+            background-color: rgba(0, 94, 184, 0.08); 
+            transform: translateY(-2px);
+        }
+        .footer { background-color: white; padding: 1.5rem 0; margin-top: 3rem; }
+        .logo-img { 
+            height: 50px; 
+            width: auto; 
+            mix-blend-mode: multiply; 
+            filter: contrast(1.2) brightness(1.1); /* Ensure white is pure white */
+            animation: trainSlide 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
+            transform-origin: left center;
+        }
+        
+        .logo-img:hover {
+            animation: shake 0.5s ease-in-out infinite;
+        }
+
+        @@keyframes trainSlide {
+            0% { transform: translateX(-100px) skewX(-20deg); opacity: 0; }
+            100% { transform: translateX(0) skewX(0); opacity: 1; }
+        }
+        
+        @@keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3 navbar-custom">
+            <div class="container">
+                <a class="navbar-brand fw-bold text-dark" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" alt="KuwGo Logo" class="logo-img me-2">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Trips" asp-action="Index">الرحلات</a></li>
+                        <li class="nav-item"><a class="nav-link text-success fw-bold" asp-controller="Trips" asp-action="Live"><i class="fas fa-satellite-dish me-1"></i> التتبع الحي</a></li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item"><a class="nav-link text-primary fw-bold" asp-controller="Admin" asp-action="Index"><i class="fas fa-tools me-1"></i> لوحة التحكم</a></li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user-circle me-1"></i> @User.Identity?.Name
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3">
+                                    <li><a class="dropdown-item" asp-controller="Bookings" asp-action="MyBookings"><i class="fas fa-list-alt me-1"></i> حجوزاتي</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            <button type="submit" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt me-1"></i> تسجيل الخروج</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item"><a class="nav-link bg-primary text-white px-4 rounded-pill shadow-sm" asp-controller="Account" asp-action="Login">دخول</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container-fluid p-0">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    <footer class="footer text-muted border-top">
+        <div class="container text-center">
+            &copy; 2025 - KuwGo - <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <!-- Toast Container for Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="stationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-primary text-white">
+                <i class="fas fa-map-marker-alt me-2"></i>
+                <strong class="me-auto">أقرب محطة لك</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body bg-white">
+                <p class="mb-2">يبدو أنك قريب من <strong id="nearestStationName" class="text-primary"></strong> (<span id="stationDistance"></span> كم).</p>
+                <div class="mt-2 pt-2 border-top">
+                    <a id="bookFromStationBtn" class="btn btn-sm btn-success w-100 fw-bold">
+                        <i class="fas fa-ticket-alt me-1"></i> احجز من هنا
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check if we already asked (optional: use localStorage to avoid spamming)
+            if (sessionStorage.getItem("locationChecked")) return;
+
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+
+                    // Send to server
+                    fetch(`/Stations/GetNearest?lat=${lat}&lng=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                document.getElementById("nearestStationName").innerText = data.stationName;
+                                document.getElementById("stationDistance").innerText = data.distance;
+                                document.getElementById("bookFromStationBtn").href = `/Trips?searchStation=${data.stationName}`; // Assuming Trips index supports search
+                                
+                                var toastEl = document.getElementById('stationToast');
+                                var toast = new bootstrap.Toast(toastEl, { delay: 10000 });
+                                toast.show();
+                                
+                                sessionStorage.setItem("locationChecked", "true");
+                            }
+                        })
+                        .catch(err => console.error("Error finding nearest station:", err));
+
+                }, function(error) {
+                    console.log("Location access denied or error:", error.message);
+                });
+            }
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

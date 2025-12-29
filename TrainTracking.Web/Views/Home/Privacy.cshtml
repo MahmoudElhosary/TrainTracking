@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "سياسة الخصوصية";
+}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-white p-4 border-bottom">
+                    <h1 class="h3 mb-0 fw-bold text-primary"><i class="fas fa-user-shield me-2"></i> @ViewData["Title"]</h1>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <p class="lead text-muted mb-5">نحن في "تتبع القطارات" نولي اهتماماً كبيراً لخصوصية بياناتك. توضح هذه السياسة كيفية جمعنا واستخدامنا وحمايتنا لمعلوماتك الشخصية.</p>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <div class="icon-box bg-light text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-database fa-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h4 class="h5 fw-bold mb-2">جمع البيانات</h4>
+                                    <p class="text-muted small">نقوم بجمع البيانات الضرورية فقط لتحسين تجربة المستخدم، مثل سجلات البحث وتفضيلات الرحلات، لضمان تقديم خدمة أفضل.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <div class="icon-box bg-light text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-check-circle fa-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h4 class="h5 fw-bold mb-2">استخدام المعلومات</h4>
+                                    <p class="text-muted small">نستخدم المعلومات لتوفير تحديثات دقيقة عن مواعيد القطارات، وتحسين أداء التطبيق، والتواصل معك بخصوص أي تغييرات.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <div class="icon-box bg-light text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-lock fa-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h4 class="h5 fw-bold mb-2">أمان البيانات</h4>
+                                    <p class="text-muted small">نتبع معايير أمان صارمة لحماية بياناتك من الوصول غير المصرح به أو التغيير أو الكشف أو الإتلاف.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <div class="icon-box bg-light text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-envelope fa-lg"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h4 class="h5 fw-bold mb-2">اتصل بنا</h4>
+                                    <p class="text-muted small">إذا كان لديك أي أسئلة حول سياسة الخصوصية هذه، يرجى التواصل معنا عبر البريد الإلكتروني: support@traintracking.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="my-5" />
+                    <div class="text-center text-muted small">
+                        <p class="mb-1">تم آخر تحديث لهذه السياسة في: @DateTime.Now.ToString("dd MMMM yyyy")</p>
+                        <p>© 2025 تتبع القطارات. جميع الحقوق محفوظة.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

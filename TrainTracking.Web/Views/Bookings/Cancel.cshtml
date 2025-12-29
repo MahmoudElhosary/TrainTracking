@@ -1,0 +1,70 @@
+@model TrainTracking.Domain.Entities.Booking
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "إلغاء الحجز";
+    decimal deductionPercentage = ViewBag.DeductionPercentage;
+    decimal refundAmount = ViewBag.RefundAmount;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header bg-danger text-white p-4 text-center">
+                    <h3 class="mb-0 fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> تأكيد إلغاء الحجز</h3>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <p class="text-muted fs-5">هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟</p>
+                    </div>
+
+                    <div class="bg-light rounded-4 p-4 mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">رقم التذكرة:</span>
+                            <span class="fw-bold">@Model.Id.ToString().Substring(0, 8)</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">الرحلة:</span>
+                            <span class="fw-bold">@(Model.Trip?.FromStation?.Name ?? "غير محدد") إلى @(Model.Trip?.ToStation?.Name ?? "غير محدد")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">موعد الإقلاع:</span>
+                            <span class="fw-bold text-primary">@(Model.Trip?.DepartureTime.ToString("yyyy/MM/dd HH:mm") ?? "--")</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">سعر التذكرة الأصلي:</span>
+                            <span class="fw-bold">@Model.Price د.ك</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 text-danger">
+                            <span>نسبة الخصم (@(deductionPercentage)%):</span>
+                            <span class="fw-bold">- @(Model.Price * (deductionPercentage / 100)) د.ك</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3 pt-3 border-top">
+                            <span class="h5 fw-bold mb-0">المبلغ المسترد:</span>
+                            <span class="h5 fw-bold text-success mb-0">@refundAmount د.ك</span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning border-0 rounded-3 small">
+                        <i class="fas fa-info-circle me-1"></i>
+                        بناءً على سياسة الإلغاء، يتم خصم @(deductionPercentage)% لأن متبقي على الرحلة @((Model.Trip.DepartureTime - DateTimeOffset.Now).TotalHours > 24 ? "أكثر من" : "أقل من") 24 ساعة.
+                    </div>
+
+                    <form asp-action="CancelConfirmed" method="post" class="mt-4">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-danger btn-lg rounded-pill fw-bold shadow-sm">
+                                <i class="fas fa-trash-alt me-2"></i> تأكيد الإلغاء واسترداد المبلغ
+                            </button>
+                            <a asp-action="MyBookings" class="btn btn-outline-secondary btn-lg rounded-pill fw-bold">
+                                تراجع
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

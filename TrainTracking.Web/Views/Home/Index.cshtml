@@ -1,0 +1,99 @@
+﻿@{
+    ViewData["Title"] = "الرئيسية";
+}
+<div class="hero-section text-center text-white d-flex align-items-center justify-content-center mb-5" style="background: linear-gradient(135deg, #2c3e50, #3498db); min-height: 500px; border-radius: 0 0 50px 50px; margin-top: -1.5rem;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 animate-fade-up">
+                <div class="mb-4">
+                    <i class="fas fa-train fa-4x text-white mb-3 opacity-75"></i>
+                </div>
+                <h1 class="display-3 fw-bold mb-3">مرحباً بك في KuwGo</h1>
+                <p class="lead fs-4 mb-5 opacity-90">رفيق سفرك الذكي لمتابعة مواعيد القطارات بدقة وسهولة. خطط لرحلتك القادمة معنا.</p>
+                <a asp-controller="Trips" asp-action="Index" class="btn btn-light btn-lg rounded-pill px-5 py-3 fw-bold text-primary shadow-lg hover-scale">
+                    <i class="fas fa-search me-2"></i> استعرض الرحلات القادمة
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container mb-5">
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 hover-lift">
+                <div class="card-body">
+                    <div class="icon-box bg-soft-primary text-primary rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                    <h3 class="h4 fw-bold mb-3">دقة في المواعيد</h3>
+                    <p class="text-muted">تابع مواعيد الانطلاق والوصول بدقة عالية وتعرف على حالات التأخير لحظة بلحظة.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 hover-lift">
+                <div class="card-body">
+                    <div class="icon-box bg-soft-success text-success rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="fas fa-map-marked-alt fa-2x"></i>
+                    </div>
+                    <h3 class="h4 fw-bold mb-3">تغطية شاملة</h3>
+                    <p class="text-muted">تغطية كاملة لجميع المحطات والخطوط الرئيسية في شبكة السكك الحديدية.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 hover-lift">
+                <div class="card-body">
+                    <div class="icon-box bg-soft-warning text-warning rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="fas fa-bolt fa-2x"></i>
+                    </div>
+                    <h3 class="h4 fw-bold mb-3">تحديث لحظي</h3>
+                    <p class="text-muted">نظام ذكي يواكب حركة القطارات ويحدث البيانات تلقائياً لضمان راحتك.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .hover-scale:hover {
+        transform: scale(1.05);
+        transition: transform 0.3s ease;
+    }
+
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .hover-lift:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+        }
+
+    .bg-soft-primary {
+        background-color: #cfe2ff;
+    }
+
+    .bg-soft-success {
+        background-color: #d1e7dd;
+    }
+
+    .bg-soft-warning {
+        background-color: #fff3cd;
+    }
+
+    .animate-fade-up {
+        animation: fadeUp 1s ease-out;
+    }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

@@ -1,0 +1,84 @@
+@model IEnumerable<TrainTracking.Domain.Entities.Trip>
+@using TrainTracking.Domain.Entities
+@{
+    ViewData["Title"] = "إدارة الرحلات";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark mb-0"><i class="fas fa-route text-primary me-2"></i> قائمة الرحلات</h2>
+        <a asp-action="CreateTrip" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">
+            <i class="fas fa-plus me-1"></i> إضافة رحلة جديدة
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light border-bottom">
+                    <tr>
+                        <th class="py-3 px-4">رقم القطار</th>
+                        <th class="py-3 px-4">المسار</th>
+                        <th class="py-3 px-4">موعد المغادرة</th>
+                        <th class="py-3 px-4">الحالة</th>
+                        <th class="py-3 px-4 text-center">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var statusClass = item.Status switch
+                        {
+                            TripStatus.OnTime => "success",
+                            TripStatus.Delayed => "danger",
+                            TripStatus.Scheduled => "primary",
+                            _ => "warning"
+                        };
+                        <tr class="border-bottom">
+                            <td class="px-4 py-3 fw-bold">@(item.Train?.TrainNumber ?? "N/A")</td>
+                            <td class="px-4 py-3">
+                                <small class="text-muted d-block">@(item.FromStation?.Name ?? "Unknown")</small>
+                                <i class="fas fa-arrow-left text-primary small mx-2"></i>
+                                <span>@(item.ToStation?.Name ?? "Unknown")</span>
+                            </td>
+                            <td class="px-4 py-3">@item.DepartureTime.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="px-4 py-3">
+                                <span class="badge bg-soft-@statusClass text-@statusClass rounded-pill">@item.Status</span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <a asp-action="EditTrip" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm rounded-pill px-3 me-1">
+                                    <i class="fas fa-edit"></i> تعديل
+                                </a>
+                                <form asp-action="DeleteTrip" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذه الرحلة؟');">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                        <i class="fas fa-trash"></i> حذف
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-link text-decoration-none text-muted">
+            <i class="fas fa-arrow-right me-1"></i> العودة للوحة التحكم
+        </a>
+    </div>
+</div>

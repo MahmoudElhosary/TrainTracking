@@ -1,0 +1,175 @@
+@model TrainTracking.Domain.Entities.Trip
+@{
+    ViewData["Title"] = "تفاصيل الرحلة";
+
+    var statusClass = Model.Status switch
+    {
+        TrainTracking.Domain.Entities.TripStatus.OnTime => "success",
+        TrainTracking.Domain.Entities.TripStatus.Delayed => "danger",
+        TrainTracking.Domain.Entities.TripStatus.Scheduled => "primary",
+        _ => "warning"
+    };
+    var statusText = Model.Status switch
+    {
+        TrainTracking.Domain.Entities.TripStatus.OnTime => "في الموعد",
+        TrainTracking.Domain.Entities.TripStatus.Delayed => "متأخر",
+        TrainTracking.Domain.Entities.TripStatus.Scheduled => "مجدول",
+        _ => Model.Status.ToString()
+    };
+}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">الرحلات</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">تفاصيل الرحلة @Model.Train.TrainNumber</li>
+                </ol>
+            </nav>
+            <div class="card shadow rounded-4 overflow-hidden border-0">
+                <div class="card-header bg-white p-4 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="h4 mb-1 fw-bold text-primary">
+                            <i class="fas fa-train me-2"></i> قطار رقم @(Model.Train?.TrainNumber ?? "N/A")
+                        </h2>
+                        <span class="text-muted small">@(Model.Train?.Type ?? "Unknown")</span>
+                    </div>
+                    <span class="badge bg-soft-@statusClass text-@statusClass rounded-pill px-3 py-2 fs-6">
+                        @statusText
+                    </span>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-box bg-white text-success rounded-circle shadow-sm d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <h5 class="mb-0 fw-bold">محطة المغادرة</h5>
+                                </div>
+                                <p class="fs-5 mb-1">@(Model.FromStation?.Name ?? "غير محدد")</p>
+                                <span class="text-muted"><i class="far fa-clock me-1"></i> @Model.DepartureTime.ToString("HH:mm")</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-box bg-white text-danger rounded-circle shadow-sm d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <h5 class="mb-0 fw-bold">محطة الوصول</h5>
+                                </div>
+                                <p class="fs-5 mb-1">@(Model.ToStation?.Name ?? "غير محدد")</p>
+                                <span class="text-muted"><i class="far fa-clock me-1"></i> @Model.ArrivalTime.ToString("HH:mm")</span>
+                            </div>
+                        </div>
+                    </div>
+                    @if (Model.DelayMinutes.HasValue && Model.DelayMinutes > 0)
+                    {
+                        <div class="alert alert-danger border-0 bg-danger bg-opacity-10 d-flex align-items-center" role="alert">
+                            <i class="fas fa-exclamation-triangle me-3 fs-4 text-danger"></i>
+                            <div>
+                                <h6 class="alert-heading mb-1 fw-bold">يوجد تأخير</h6>
+                                <p class="mb-0 small">الرحلة متأخرة بمقدار <strong>@Model.DelayMinutes دقيقة</strong> عن الموعد المحدد.</p>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="row border-top pt-4 mt-2">
+                        <div class="col-6 text-center border-end">
+                            <span class="d-block text-muted small mb-1">مدة الرحلة</span>
+                            <span class="fw-bold text-dark">
+                                @{
+                                    var duration = Model.ArrivalTime - Model.DepartureTime;
+                                    <text>@duration.Hours ساعة @(duration.Minutes > 0 ? $"و {duration.Minutes} دقيقة" : "")</text>
+                                }
+                            </span>
+                        </div>
+                        <div class="col-6 text-center">
+                            <span class="d-block text-muted small mb-1">نوع القطار</span>
+                            <span class="fw-bold text-dark">@Model.Train.Type</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div id="liveTrackerMap" style="height: 300px; width: 100%;" class="border-top border-bottom"></div>
+                </div>
+
+                <div class="card-footer bg-light p-4 text-center border-top">
+                    <a asp-controller="Bookings" asp-action="Create" asp-route-id="@Model.Id" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm me-2">
+                        <i class="fas fa-ticket-alt me-2"></i> احجز الآن
+                    </a>
+                    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-5 py-2">
+                        <i class="fas fa-arrow-right me-2"></i> العودة للقائمة
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var trip = {
+                from: { name: "@(Model.FromStation?.Name ?? "Unknown")", lat: @(Model.FromStation?.Latitude ?? 0), lng: @(Model.FromStation?.Longitude ?? 0) },
+                to: { name: "@(Model.ToStation?.Name ?? "Unknown")", lat: @(Model.ToStation?.Latitude ?? 0), lng: @(Model.ToStation?.Longitude ?? 0) },
+                departure: @Model.DepartureTime.ToUnixTimeMilliseconds(),
+                arrival: @Model.ArrivalTime.ToUnixTimeMilliseconds()
+            };
+
+            var map = L.map('liveTrackerMap').setView([trip.from.lat, trip.from.lng], 8);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Add station markers
+            L.circleMarker([trip.from.lat, trip.from.lng], { radius: 6, color: '#27ae60', fillOpacity: 0.8 }).addTo(map).bindPopup("المغادرة: " + trip.from.name);
+            L.circleMarker([trip.to.lat, trip.to.lng], { radius: 6, color: '#e74c3c', fillOpacity: 0.8 }).addTo(map).bindPopup("الوصول: " + trip.to.name);
+            
+            // Draw path
+            L.polyline([[trip.from.lat, trip.from.lng], [trip.to.lat, trip.to.lng]], {
+                color: '#3498db',
+                weight: 4,
+                opacity: 0.6,
+                dashArray: '10, 10'
+            }).addTo(map);
+
+            var trainIcon = L.divIcon({
+                html: '<i class="fas fa-train text-primary fs-3" style="text-shadow: 0 0 5px white;"></i>',
+                className: 'train-moving-icon',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            var trainMarker = L.marker([trip.from.lat, trip.from.lng], { icon: trainIcon }).addTo(map);
+
+            function updatePosition() {
+                var now = Date.now();
+                var progress = (now - trip.departure) / (trip.arrival - trip.departure);
+                
+                if (progress < 0) progress = 0;
+                if (progress > 1) progress = 1;
+
+                var curLat = trip.from.lat + (trip.to.lat - trip.from.lat) * progress;
+                var curLng = trip.from.lng + (trip.to.lng - trip.from.lng) * progress;
+
+                trainMarker.setLatLng([curLat, curLng]);
+                
+                // Keep marker in view if it's moving
+                if (progress > 0 && progress < 1) {
+                    // map.panTo([curLat, curLng]); // Optional: follow train
+                }
+            }
+
+            setInterval(updatePosition, 1000);
+            updatePosition();
+            
+            // Fit bounds to show both stations
+            map.fitBounds([[trip.from.lat, trip.from.lng], [trip.to.lat, trip.to.lng]], { padding: [50, 50] });
+        });
+    </script>
+}

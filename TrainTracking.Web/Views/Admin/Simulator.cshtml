@@ -1,0 +1,67 @@
+@model IEnumerable<TrainTracking.Domain.Entities.Trip>
+@{
+    ViewData["Title"] = "محاكي حركة القطارات";
+}
+
+<div class="container py-5">
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="card-header bg-dark text-white p-4">
+            <h2 class="h4 mb-0 fw-bold"><i class="fas fa-gamepad me-2 text-warning"></i> لوحة التحكم في المحاكاة</h2>
+        </div>
+        <div class="card-body p-4 bg-light">
+            <div class="alert alert-info border-0 bg-info bg-opacity-10 mb-4">
+                <i class="fas fa-info-circle me-2"></i> 
+                استخدم هذه اللوحة لمحاكاة حركة القطارات يدوياً. التحديثات ستظهر فوراً في صفحة **"التتبع الحي"** لجميع المستخدمين.
+            </div>
+
+            <div class="row g-4">
+                @foreach (var trip in Model)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h5 class="fw-bold mb-0">قطار @(trip.Train?.TrainNumber ?? "N/A")</h5>
+                                    <span class="badge bg-primary rounded-pill">نشط</span>
+                                </div>
+                                <div class="mb-3 x-small text-muted">
+                                    من: @(trip.FromStation?.Name ?? "Unknown") <br>
+                                    إلى: @(trip.ToStation?.Name ?? "Unknown")
+                                </div>
+                                
+                                <label class="form-label small fw-bold">التحكم في المسار (Simulation)</label>
+                                <input type="range" class="form-range" min="0" max="100" value="0" 
+                                       oninput="simulateMove('@trip.Id', this.value, @(trip.FromStation?.Latitude ?? 0), @(trip.FromStation?.Longitude ?? 0), @(trip.ToStation?.Latitude ?? 0), @(trip.ToStation?.Longitude ?? 0))">
+                                
+                                <div class="d-flex justify-content-between mt-2 small text-muted">
+                                    <span>المغادرة</span>
+                                    <span>الوصول</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        var connection = new signalR.HubConnectionBuilder().withUrl("/tripHub").build();
+        connection.start();
+
+        function simulateMove(tripId, percent, fromLat, fromLng, toLat, toLng) {
+            var progress = percent / 100;
+            var curLat = fromLat + (toLat - fromLat) * progress;
+            var curLng = fromLng + (toLng - fromLng) * progress;
+
+            // Broadcast via SignalR
+            if (connection.state === signalR.HubConnectionState.Connected) {
+                connection.invoke("SendLocation", tripId, curLat, curLng)
+                    .catch(err => console.error(err));
+            }
+        }
+    </script>
+}
