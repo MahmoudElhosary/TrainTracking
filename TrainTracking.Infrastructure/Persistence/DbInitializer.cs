@@ -11,7 +11,18 @@ public static class DbInitializer
 {
     public static async Task Seed(TrainTrackingDbContext context, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
     {
-        context.Database.Migrate();
+        try 
+        {
+            Console.WriteLine("[KuwGo] Applying migrations...");
+            context.Database.Migrate();
+            Console.WriteLine("[KuwGo] Migrations applied successfully.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[KuwGo] WARNING: Migration failed or tables already exist: {ex.Message}");
+            // Continue seeding even if migrate fails (tables might exist from EnsureCreated)
+        }
+
 
         // Seed Kuwaiti Stations (Specific Areas)
         if (!context.Stations.Any(s => s.Name.Contains("الكويت") || s.Name.Contains("الأحمدي")))

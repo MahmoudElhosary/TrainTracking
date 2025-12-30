@@ -53,9 +53,9 @@ try
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; 
     });
 
-    // Configure SQLite with Pooling for performance
+    // Configure SQLite (Standard Context - Pooling can cause issues with Migrations/SQLite)
     var dbPath = Environment.GetEnvironmentVariable("DATABASE_PATH") ?? "kuwgo_v2.db";
-    builder.Services.AddDbContextPool<TrainTrackingDbContext>(options =>
+    builder.Services.AddDbContext<TrainTrackingDbContext>(options =>
         options.UseSqlite($"Data Source={dbPath}"));
 
     builder.Services.AddScoped<ITrainRepository, TrainRepository>();
@@ -92,7 +92,7 @@ try
         pattern: "{controller=Home}/{action=Index}/{id?}");
     app.MapHub<TripHub>("/tripHub");
 
-    // Initialize Database and Seed Essential Data
+    // Initialize Database and Seed Essential Data (NON-BLOCKING or explicitly caught)
     Console.WriteLine("[KuwGo] Initializing database and essential data...");
     using (var scope = app.Services.CreateScope())
     {
@@ -103,14 +103,15 @@ try
             var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             
-            // This now runs synchronously during startup to block until ready
-            DbInitializer.Seed(context, userManager, roleManager).GetAwaiter().GetResult();
+            // Revert to async call but wait to ensure completion for the first user
+            await DbInitializer.Seed(context, userManager, roleManager);
             
-            Console.WriteLine("[KuwGo] Database ready.");
+            Console.WriteLine("[KuwGo] Database initialization completed.");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[KuwGo] ERROR during database initialization: {ex.Message}");
+            if (ex.InnerException != null) Console.WriteLine($"[KuwGo] INNER: {ex.InnerException.Message}");
         }
     }
 
