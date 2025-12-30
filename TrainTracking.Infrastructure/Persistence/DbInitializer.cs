@@ -111,7 +111,16 @@ public static class DbInitializer
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(user, "Admin");
+                Console.WriteLine("[KuwGo] Admin user created successfully.");
             }
+            else
+            {
+                Console.WriteLine($"[KuwGo] FAILED to create admin user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("[KuwGo] Admin user already exists.");
         }
     }
 }
