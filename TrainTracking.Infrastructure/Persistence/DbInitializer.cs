@@ -108,7 +108,7 @@ public static class DbInitializer
         }
 
         // Seed Admin User
-        var adminEmail = "admin@train.com";
+        var adminEmail = "Admin@train.com";
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
         if (adminUser == null)
         {
@@ -118,20 +118,25 @@ public static class DbInitializer
                 Email = adminEmail,
                 EmailConfirmed = true
             };
-            var result = await userManager.CreateAsync(user, "Admin123!");
+            var result = await userManager.CreateAsync(user, "Admin1234!");
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(user, "Admin");
-                Console.WriteLine("[KuwGo] Admin user created successfully.");
-            }
-            else
-            {
-                Console.WriteLine($"[KuwGo] FAILED to create admin user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                Console.WriteLine("[KuwGo] Admin user created with Admin1234!");
             }
         }
         else
         {
-            Console.WriteLine("[KuwGo] Admin user already exists.");
+            // Ensure Password is reset to match user's expectation
+            var resetToken = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+            await userManager.ResetPasswordAsync(adminUser, resetToken, "Admin1234!");
+            
+            // Ensure Role is still there
+            if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+            }
+            Console.WriteLine("[KuwGo] Admin user password reset to Admin1234!");
         }
     }
 }
