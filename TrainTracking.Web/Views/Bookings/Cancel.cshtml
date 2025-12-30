@@ -48,7 +48,7 @@
 
                     <div class="alert alert-warning border-0 rounded-3 small">
                         <i class="fas fa-info-circle me-1"></i>
-                        بناءً على سياسة الإلغاء، يتم خصم @(deductionPercentage)% لأن متبقي على الرحلة @((Model.Trip.DepartureTime - DateTimeOffset.Now).TotalHours > 24 ? "أكثر من" : "أقل من") 24 ساعة.
+                        بناءً على سياسة الإلغاء، يتم خصم @(deductionPercentage)% لأن متبقي على الرحلة @((Model.Trip?.DepartureTime ?? DateTimeOffset.Now.AddHours(25)) - DateTimeOffset.Now).TotalHours > 24 ? "أكثر من" : "أقل من") 24 ساعة.
                     </div>
 
                     <form asp-action="CancelConfirmed" method="post" class="mt-4">

@@ -14,7 +14,7 @@ namespace TrainTracking.Infrastructure.Services
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<TripCleanupService> _logger;
-        private readonly TimeSpan _executionInterval = TimeSpan.FromHours(1);
+        private readonly TimeSpan _executionInterval = TimeSpan.FromMinutes(10);
 
         public TripCleanupService(IServiceProvider serviceProvider, ILogger<TripCleanupService> logger)
         {
@@ -39,9 +39,11 @@ namespace TrainTracking.Infrastructure.Services
                         var kuwaitOffset = TimeSpan.FromHours(3);
                         var now = DateTimeOffset.UtcNow.ToOffset(kuwaitOffset);
 
-                        // Delete trips that arrived more than 1 hour ago
+                        // Delete trips that arrived more than 1 hour ago 
+                        // OR departed more than 24 hours ago (safety cleanup)
+                        var oneDayAgo = now.AddDays(-1);
                         var expiredTrips = await context.Trips
-                            .Where(t => t.ArrivalTime < now.AddHours(-1))
+                            .Where(t => t.ArrivalTime < now.AddHours(-1) || t.DepartureTime < oneDayAgo)
                             .ToListAsync(stoppingToken);
 
                         if (expiredTrips.Any())

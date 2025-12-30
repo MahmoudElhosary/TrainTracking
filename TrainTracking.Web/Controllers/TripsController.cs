@@ -3,6 +3,8 @@ using TrainTracking.Application.Interfaces;
 using TrainTracking.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using TrainTracking.Domain.Entities;
+using MediatR;
+using TrainTracking.Application.Features.Trips.Queries.GetUpcomingTrips;
 
 namespace TrainTracking.Web.Controllers
 {
@@ -11,12 +13,15 @@ namespace TrainTracking.Web.Controllers
         private readonly ITripRepository _tripRepository;
         private readonly IStationRepository _stationRepository;
         private readonly TrainTrackingDbContext _context;
+        private readonly IMediator _mediator;
 
-        public TripsController(ITripRepository tripRepository, IStationRepository stationRepository, TrainTrackingDbContext context)
+        public TripsController(ITripRepository tripRepository, IStationRepository stationRepository, 
+            TrainTrackingDbContext context, IMediator mediator)
         {
             _tripRepository = tripRepository;
             _stationRepository = stationRepository;
             _context = context;
+            _mediator = mediator;
         }
 
         public async Task<IActionResult> Index(Guid? fromStationId, Guid? toStationId, DateTime? date, string? searchStation)
@@ -33,7 +38,12 @@ namespace TrainTracking.Web.Controllers
                 }
             }
 
-            var trips = await _tripRepository.GetUpcomingTripsAsync(fromStationId, toStationId, date);
+            var query = new GetUpcomingTripsQuery { 
+                FromStationId = fromStationId, 
+                ToStationId = toStationId, 
+                Date = date 
+            };
+            var trips = await _mediator.Send(query);
             
             ViewBag.Stations = stations;
             ViewBag.FromStationId = fromStationId;

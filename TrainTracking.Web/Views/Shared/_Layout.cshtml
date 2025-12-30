@@ -1,4 +1,18 @@
-﻿<!DOCTYPE html>
+﻿@using TrainTracking.Domain.Enums
+@inject TrainTracking.Application.Interfaces.IBookingRepository BookingRepo
+@{
+    int points = 0;
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (userId != null)
+        {
+            var bookings = await BookingRepo.GetBookingsByUserIdAsync(userId);
+            points = (int)bookings.Where(b => b.Status == BookingStatus.Confirmed).Sum(b => b.Price * 10);
+        }
+    }
+}
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8" />
@@ -25,29 +39,7 @@
             transform: translateY(-2px);
         }
         .footer { background-color: white; padding: 1.5rem 0; margin-top: 3rem; }
-        .logo-img { 
-            height: 50px; 
-            width: auto; 
-            mix-blend-mode: multiply; 
-            filter: contrast(1.2) brightness(1.1); /* Ensure white is pure white */
-            animation: trainSlide 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
-            transform-origin: left center;
-        }
-        
-        .logo-img:hover {
-            animation: shake 0.5s ease-in-out infinite;
-        }
-
-        @@keyframes trainSlide {
-            0% { transform: translateX(-100px) skewX(-20deg); opacity: 0; }
-            100% { transform: translateX(0) skewX(0); opacity: 1; }
-        }
-        
-        @@keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-2px); }
-            75% { transform: translateX(2px); }
-        }
+        .footer { background-color: white; padding: 1.5rem 0; margin-top: 3rem; }
     </style>
 </head>
 <body>
@@ -73,30 +65,99 @@
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-user-circle me-1"></i> @User.Identity?.Name
+                            <!-- My Bookings Link -->
+                            <li class="nav-item">
+                                <a class="nav-link position-relative highlight-link pe-3" asp-controller="Bookings" asp-action="MyBookings">
+                                    <i class="fas fa-ticket-alt me-1"></i> حجوزاتي
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3">
-                                    <li><a class="dropdown-item" asp-controller="Bookings" asp-action="MyBookings"><i class="fas fa-list-alt me-1"></i> حجوزاتي</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                            <button type="submit" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt me-1"></i> تسجيل الخروج</button>
-                                        </form>
-                                    </li>
-                                </ul>
+                            </li>
+
+                            <li class="nav-item d-none d-lg-flex align-items-center px-1 mx-2">
+                                <div class="vr h-50 my-auto bg-secondary opacity-25"></div>
+                            </li>
+
+                            <!-- Points Icon -->
+                            <li class="nav-item d-flex align-items-center mx-3">
+                                <a asp-controller="Bookings" asp-action="Rewards" class="points-standalone-btn shadow-sm rounded-circle d-flex align-items-center justify-content-center text-decoration-none" style="width: 42px; height: 42px;" title="رصيد نقاطي: @points">
+                                    <div class="coin-glow m-0">
+                                        <i class="fas fa-dollar-sign text-warning"></i>
+                                    </div>
+                                </a>
+                            </li>
+
+                            <!-- User Actions Capsule -->
+                            <li class="nav-item d-flex align-items-center ms-3">
+                                <div class="user-capsule d-flex align-items-center p-1 rounded-pill shadow-sm">
+                                    <!-- User Account Icon -->
+                                    <div class="d-flex align-items-center px-2">
+                                        <div class="user-avatar-sm" title="@User.Identity?.Name">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Divider -->
+                                    <div class="vr h-50 my-auto bg-secondary opacity-25 mx-0"></div>
+
+                                    <!-- Logout Button -->
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-flex align-items-center m-0">
+                                        <button type="submit" onclick="sessionStorage.removeItem('locationChecked')" class="btn btn-sm btn-icon-only text-danger-soft rounded-circle" title="تسجيل الخروج">
+                                            <i class="fas fa-power-off"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item"><a class="nav-link bg-primary text-white px-4 rounded-pill shadow-sm" asp-controller="Account" asp-action="Login">دخول</a></li>
                         }
+                        
+                        <!-- Dark Mode Toggle -->
+                        <li class="nav-item ms-2">
+                           <button id="themeToggle" class="btn btn-link nav-link theme-toggle-btn" title="تغيير المظهر">
+                                <i class="fas fa-moon"></i>
+                            </button>
+                        </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
+
+    <script>
+        // Check for saved theme preference or use system preference
+        const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const toggleBtn = document.getElementById('themeToggle');
+            const icon = toggleBtn.querySelector('i');
+
+            // Set initial icon
+            if (currentTheme === 'dark') {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                icon.style.color = '#ffc107'; // Sun yellow
+            }
+
+            toggleBtn.addEventListener('click', function() {
+                let theme = document.documentElement.getAttribute('data-theme');
+                if (theme === 'light') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    icon.style.color = '#ffc107';
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    icon.style.color = ''; // Reset color
+                }
+            });
+        });
+    </script>
     <div class="container-fluid p-0">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -129,6 +190,8 @@
         </div>
     </div>
 
+    @if (User.Identity?.IsAuthenticated == true)
+    {
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             // Check if we already asked (optional: use localStorage to avoid spamming)
@@ -163,6 +226,7 @@
             }
         });
     </script>
+    }
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

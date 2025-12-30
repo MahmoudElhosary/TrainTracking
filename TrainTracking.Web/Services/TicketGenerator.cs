@@ -23,7 +23,7 @@ namespace TrainTracking.Web.Services
             // Generate QR Code
             byte[] qrCodeImage = GenerateQrCode(qrUrl);
             string logoPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "logo.png");
-            byte[] logoImage = File.Exists(logoPath) ? File.ReadAllBytes(logoPath) : null;
+            byte[]? logoImage = File.Exists(logoPath) ? File.ReadAllBytes(logoPath) : null;
 
             var document = QuestPDF.Fluent.Document.Create(container =>
             {

@@ -8,6 +8,7 @@ using QuestPDF.Infrastructure;
 using TrainTracking.Web.Services;
 using TrainTracking.Infrastructure.Services;
 using TrainTracking.Infrastructure.Configuration;
+using TrainTracking.Application.Services;
 
 // QuestPDF License
 QuestPDF.Settings.License = LicenseType.Community;
@@ -38,11 +39,15 @@ builder.Services.AddScoped<ITripRepository, TripRepository>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IStationRepository, StationRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IDateTimeService, DateTimeService>();
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(TrainTracking.Application.Features.Trips.Queries.GetUpcomingTrips.GetUpcomingTripsQuery).Assembly));
+builder.Services.AddAutoMapper(typeof(TrainTracking.Application.Mappings.MappingProfile).Assembly);
 builder.Services.AddHostedService<TripCleanupService>();
 builder.Services.Configure<TwilioSettings>(builder.Configuration.GetSection("TwilioSettings"));
 builder.Services.AddHttpClient<ISmsService, TwilioSmsService>();
 builder.Services.AddScoped<TicketGenerator>();
 builder.Services.AddScoped<IEmailService, MockEmailService>();
+builder.Services.AddScoped<ITripService, TripService>();
 
 var app = builder.Build();
 

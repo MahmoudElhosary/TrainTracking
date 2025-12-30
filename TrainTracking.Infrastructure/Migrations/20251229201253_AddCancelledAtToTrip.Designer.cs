@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrainTracking.Infrastructure.Persistence;
 
@@ -10,9 +11,11 @@ using TrainTracking.Infrastructure.Persistence;
 namespace TrainTracking.Infrastructure.Migrations
 {
     [DbContext(typeof(TrainTrackingDbContext))]
-    partial class TrainTrackingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251229201253_AddCancelledAtToTrip")]
+    partial class AddCancelledAtToTrip
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -382,9 +385,6 @@ namespace TrainTracking.Infrastructure.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("FromStationId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PathPolyline")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Status")

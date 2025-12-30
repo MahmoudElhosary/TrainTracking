@@ -1,0 +1,151 @@
+@using TrainTracking.Domain.Enums
+@{
+    ViewData["Title"] = "مركز مكافآت KuwGo";
+    var totalPoints = ViewBag.TotalPoints as int? ?? 0;
+    var confirmedBookings = ViewBag.ConfirmedBookings as List<TrainTracking.Domain.Entities.Booking> ?? new List<TrainTracking.Domain.Entities.Booking>();
+}
+
+<div class="container py-5">
+    <!-- Rewards Header -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-primary mb-2">مركز مكافآت KuwGo</h1>
+        <p class="text-muted">نقدر ولاءك.. سافر أكثر واكسب نقاطاً أكثر!</p>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center">
+            <i class="fas fa-check-circle me-3 fs-3"></i>
+            <div>@TempData["Success"]</div>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center">
+            <i class="fas fa-exclamation-circle me-3 fs-3"></i>
+            <div>@TempData["Error"]</div>
+        </div>
+    }
+
+    <div class="row g-5">
+        <!-- Rewards Card Section -->
+        <div class="col-lg-5">
+            <h4 class="fw-bold mb-4"><i class="fas fa-credit-card me-2 text-primary"></i>بطاقة المكافآت</h4>
+            
+            <div class="visa-points-card mb-4">
+                <div class="card-logo">KUWGO GOLD</div>
+                <div class="visa-chip"></div>
+                <div class="card-number">**** **** **** @(User.Identity?.Name?.Length ?? 1234)</div>
+                
+                <div class="mt-auto d-flex justify-content-between align-items-end">
+                    <div>
+                        <div class="card-holder">@User.Identity?.Name</div>
+                        <div class="card-points-label">عضو بلاتيني</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="card-points-label">رصيد النقاط</div>
+                        <div class="card-points-value">@totalPoints.ToString("N0")</div>
+                    </div>
+                </div>
+                <div class="visa-card-bg-decoration"></div>
+            </div>
+
+            <!-- Redemption Box -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-light">
+                <h5 class="fw-bold mb-3">تحويل النقاط لتذاكر</h5>
+                <p class="small text-muted mb-4">كل 200 نقطة تمنحك تذكرة مجانية واحدة لأي وجهة في الكويت (بقيمة 2 د.ك).</p>
+                
+                <div class="d-flex align-items-center mb-4">
+                    <div class="flex-grow-1">
+                        <div class="progress rounded-pill" style="height: 10px;">
+                            <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" 
+                                 style="width: @(Math.Min(100, (totalPoints / 200.0) * 100))%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 small text-muted">
+                            <span>0 نقطة</span>
+                            <span class="fw-bold text-dark">@totalPoints / 200</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form asp-action="RedeemPoints" method="post">
+                    <button type="submit" class="btn @(totalPoints >= 200 ? "btn-primary" : "btn-secondary disabled") w-100 rounded-pill py-3 fw-bold shadow-sm transition-all" @(totalPoints < 200 ? "disabled" : "")>
+                        <i class="fas fa-ticket-alt me-2"></i> استبدال بـ تذكرة مجانية
+                    </button>
+                    @if (totalPoints < 200)
+                    {
+                        <div class="text-center mt-3 small text-muted">
+                            <i class="fas fa-info-circle me-1"></i> يتبقى لك @(200 - totalPoints) نقطة للحصول على أول تذكرة مجانية.
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="col-lg-7">
+            <h4 class="fw-bold mb-4"><i class="fas fa-history me-2 text-primary"></i>سجل النقاط</h4>
+            
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                @if (confirmedBookings.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="px-4 py-3">الرحلة</th>
+                                    <th class="px-3 py-3">المبلغ المصروف</th>
+                                    <th class="px-3 py-3 text-end">النقاط المكتسبة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var booking in confirmedBookings.OrderByDescending(b => b.BookingDate))
+                                {
+                                    <tr>
+                                        <td class="px-4 py-3">
+                                            <div class="fw-bold">@booking.Trip?.FromStation?.Name <i class="fas fa-arrow-left text-muted mx-1 fa-xs"></i> @booking.Trip?.ToStation?.Name</div>
+                                            <div class="small text-muted">@booking.BookingDate.ToString("dd MMM yyyy")</div>
+                                        </td>
+                                        <td class="px-3 py-3">
+                                            <span class="badge bg-soft-primary text-primary px-3">@booking.Price.ToString("F3") د.ك</span>
+                                        </td>
+                                        <td class="px-3 py-3 text-end">
+                                            <div class="fw-bold text-success">+@((int)(booking.Price * 10)) <i class="fas fa-plus-circle ms-1 small"></i></div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-5 text-center">
+                        <i class="fas fa-seedling text-muted fs-1 mb-3 opacity-25"></i>
+                        <p class="text-muted">ابدأ رحلتك الأولى مع KuwGo واجمع نقاطك لتستبدلها بتذاكر مجانية!</p>
+                        <a asp-controller="Trips" asp-action="Index" class="btn btn-primary rounded-pill px-4">استعرض الرحلات الآن</a>
+                    </div>
+                }
+            </div>
+
+            <!-- Rewards Banner -->
+            <div class="mt-4 p-4 rounded-4 bg-dark text-white shadow-lg overflow-hidden position-relative">
+                <div class="position-absolute top-0 end-0 p-4 opacity-10">
+                    <i class="fas fa-gift fa-6x"></i>
+                </div>
+                <div class="position-relative">
+                    <h5 class="fw-bold mb-2">عروض حصرية للأعضاء!</h5>
+                    <p class="small mb-0 opacity-75">سجل في القائمة البريدية لتحصل على ضعف النقاط في عطلات نهاية الأسبوع.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-soft-primary { background-color: rgba(13, 110, 253, 0.1); }
+    .transition-all { transition: all 0.3s ease; }
+    .card:hover .badge { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+</style>

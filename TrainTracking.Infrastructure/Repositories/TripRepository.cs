@@ -12,10 +12,12 @@ namespace TrainTracking.Infrastructure.Repositories;
 public class TripRepository : ITripRepository
 {
     private readonly TrainTrackingDbContext _context;
+    private readonly IDateTimeService _dateTimeService;
 
-    public TripRepository(TrainTrackingDbContext context)
+    public TripRepository(TrainTrackingDbContext context, IDateTimeService dateTimeService)
     {
         _context = context;
+        _dateTimeService = dateTimeService;
     }
 
     public async Task<List<Trip>> GetUpcomingTripsAsync(Guid? fromStationId = null, Guid? toStationId = null, DateTime? date = null)
@@ -36,25 +38,30 @@ public class TripRepository : ITripRepository
             query = query.Where(t => t.ToStationId == toStationId.Value);
         }
 
+        var now = _dateTimeService.Now;
+        var oneHourAgo = now.AddHours(-1);
+        
+        // Fetch and filter in-memory as a fail-safe for SQLite DateTimeOffset string comparison inconsistencies
+        var allTrips = await query.ToListAsync();
+
         if (date.HasValue)
         {
             var targetDate = date.Value.Date;
-            // For date only comparison, we can still use the property but we should be careful.
-            // Since we converted to string, complex date logic in LINQ might still be tricky.
-            // Let's use a range for the target date instead.
-            var start = new DateTimeOffset(targetDate);
+            var start = new DateTimeOffset(targetDate, _dateTimeService.Now.Offset);
             var end = start.AddDays(1);
-            query = query.Where(t => t.DepartureTime >= start && t.DepartureTime < end);
+            
+            return allTrips.Where(t => 
+                (t.DepartureTime >= start && t.DepartureTime < end && t.DepartureTime >= now && t.Status != TripStatus.Completed) ||
+                (t.Status == TripStatus.Cancelled && t.CancelledAt >= oneHourAgo && t.CancelledAt >= start && t.CancelledAt < end)
+            ).OrderBy(t => t.DepartureTime).ToList();
         }
         else
         {
-            var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(3));
-            query = query.Where(t => t.DepartureTime >= now);
+            return allTrips.Where(t => 
+                (t.DepartureTime >= now && t.Status != TripStatus.Completed) || 
+                (t.Status == TripStatus.Cancelled && t.CancelledAt >= oneHourAgo)
+            ).OrderBy(t => t.DepartureTime).ToList();
         }
-
-        return await query
-            .OrderBy(t => t.DepartureTime)
-            .ToListAsync();
     }
 
     public async Task<Trip?> GetTripWithStationsAsync(Guid id)
@@ -89,6 +96,36 @@ public class TripRepository : ITripRepository
         var trip = await _context.Trips.FindAsync(id);
         if (trip != null)
         {
+            // 1. Delete notifications related to this trip
+            var tripNotifications = await _context.Notifications
+                .Where(n => n.TripId == id)
+                .ToListAsync();
+            if (tripNotifications.Any())
+            {
+                _context.Notifications.RemoveRange(tripNotifications);
+            }
+
+            // 2. Delete bookings related to this trip (and their notifications)
+            var tripBookings = await _context.Bookings
+                .Where(b => b.TripId == id)
+                .ToListAsync();
+            
+            if (tripBookings.Any())
+            {
+                var bookingIds = tripBookings.Select(b => b.Id).ToList();
+                var bookingNotifications = await _context.Notifications
+                    .Where(n => n.BookingId.HasValue && bookingIds.Contains(n.BookingId.Value))
+                    .ToListAsync();
+                
+                if (bookingNotifications.Any())
+                {
+                    _context.Notifications.RemoveRange(bookingNotifications);
+                }
+
+                _context.Bookings.RemoveRange(tripBookings);
+            }
+
+            // 3. Finally delete the trip
             _context.Trips.Remove(trip);
             await _context.SaveChangesAsync();
         }

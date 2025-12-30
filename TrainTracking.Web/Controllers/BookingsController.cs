@@ -15,10 +15,11 @@ namespace TrainTracking.Web.Controllers
         private readonly IEmailService _emailService;
         private readonly ISmsService _smsService;
         private readonly INotificationRepository _notificationRepository;
+        private readonly IDateTimeService _dateTimeService;
 
         public BookingsController(IBookingRepository bookingRepository, ITripRepository tripRepository, 
             Services.TicketGenerator ticketGenerator, IEmailService emailService, ISmsService smsService,
-            INotificationRepository notificationRepository)
+            INotificationRepository notificationRepository, IDateTimeService dateTimeService)
         {
             _bookingRepository = bookingRepository;
             _tripRepository = tripRepository;
@@ -26,6 +27,7 @@ namespace TrainTracking.Web.Controllers
             _emailService = emailService;
             _smsService = smsService;
             _notificationRepository = notificationRepository;
+            _dateTimeService = dateTimeService;
         }
 
         [HttpGet]
@@ -49,7 +51,7 @@ namespace TrainTracking.Web.Controllers
             {
                 TripId = targetId.Value,
                 Trip = trip,
-                Price = 50 
+                Price = 2 
             };
 
             return View(booking);
@@ -73,7 +75,7 @@ namespace TrainTracking.Web.Controllers
                     booking.Id = Guid.NewGuid();
                     booking.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "Anonymous";
                     booking.Status = BookingStatus.PendingPayment;
-                    booking.BookingDate = DateTimeOffset.Now;
+                    booking.BookingDate = _dateTimeService.Now;
                     await _bookingRepository.CreateAsync(booking);
 
                     // Redirect to Payment
@@ -168,6 +170,7 @@ namespace TrainTracking.Web.Controllers
             return RedirectToAction(nameof(Success), new { bookingId = booking.Id });
         }
 
+
         [Authorize]
         public async Task<IActionResult> MyBookings()
         {
@@ -175,7 +178,72 @@ namespace TrainTracking.Web.Controllers
             if (userId == null) return Forbid();
 
             var bookings = await _bookingRepository.GetBookingsByUserIdAsync(userId);
+            
+            // Real Points = (Confirmed Bookings * 10) - Redeemed Points
+            var earnedPoints = (int)bookings
+                .Where(b => b.Status == BookingStatus.Confirmed)
+                .Sum(b => b.Price * 10);
+            
+            var redeemedPoints = await _bookingRepository.GetRedeemedPointsAsync(userId);
+            ViewBag.TotalPoints = earnedPoints - redeemedPoints;
+
             return View(bookings);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Rewards()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Forbid();
+
+            var bookings = await _bookingRepository.GetBookingsByUserIdAsync(userId);
+            var confirmedBookings = bookings.Where(b => b.Status == BookingStatus.Confirmed).ToList();
+            
+            var earnedPoints = (int)confirmedBookings.Sum(b => b.Price * 10);
+            var redeemedPoints = await _bookingRepository.GetRedeemedPointsAsync(userId);
+            
+            ViewBag.TotalPoints = earnedPoints - redeemedPoints;
+            ViewBag.ConfirmedBookings = confirmedBookings;
+
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> RedeemPoints()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Forbid();
+
+            var bookings = await _bookingRepository.GetBookingsByUserIdAsync(userId);
+            var earnedPoints = (int)bookings
+                .Where(b => b.Status == BookingStatus.Confirmed)
+                .Sum(b => b.Price * 10);
+            
+            var redeemedPointsBefore = await _bookingRepository.GetRedeemedPointsAsync(userId);
+            var currentPoints = earnedPoints - redeemedPointsBefore;
+
+            if (currentPoints < 200)
+            {
+                TempData["Error"] = "عذراً، تحتاج إلى 200 نقطة على الأقل للحصول على تذكرة مجانية.";
+                return RedirectToAction(nameof(Rewards));
+            }
+
+            // Persistence: Deduct points by creating a redemption record
+            var redemption = new PointRedemption
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                PointsRedeemed = 200,
+                RedemptionDate = _dateTimeService.Now,
+                Description = "استبدال تذكرة مجانية (200 نقطة)"
+            };
+
+            await _bookingRepository.CreateRedemptionAsync(redemption);
+
+            TempData["Success"] = "تهانينا! لقد قمت بتحويل 200 نقطة إلى تذكرة مجانية بنجاح. تم خصم النقاط من رصيدك.";
+            
+            return RedirectToAction(nameof(Rewards));
         }
 
         public IActionResult Success(Guid? bookingId)
@@ -219,7 +287,7 @@ namespace TrainTracking.Web.Controllers
             return File(pdf, "application/pdf", $"Ticket-{booking.Id.ToString().Substring(0, 8)}.pdf");
         }
 
-        private string GetLocalIpAddress()
+        private string? GetLocalIpAddress()
         {
             var host = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName());
             
@@ -262,7 +330,8 @@ namespace TrainTracking.Web.Controllers
                 return BadRequest("هذا الحجز ملغي بالفعل.");
             }
 
-            var timeToDeparture = booking.Trip.DepartureTime - DateTimeOffset.Now;
+            var now = _dateTimeService.Now;
+            var timeToDeparture = booking.Trip.DepartureTime - now;
             if (timeToDeparture.TotalSeconds <= 0)
             {
                 return BadRequest("لا يمكن إلغاء حجز لرحلة قد بدأت بالفعل.");
@@ -293,7 +362,8 @@ namespace TrainTracking.Web.Controllers
                 return RedirectToAction(nameof(MyBookings));
             }
 
-            var timeToDeparture = booking.Trip.DepartureTime - DateTimeOffset.Now;
+            var now = _dateTimeService.Now;
+            var timeToDeparture = booking.Trip.DepartureTime - now;
             if (timeToDeparture.TotalSeconds <= 0)
             {
                 return BadRequest("لا يمكن إلغاء حجز لرحلة قد بدأت بالفعل.");

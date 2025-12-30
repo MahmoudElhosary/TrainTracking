@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrainTracking.Infrastructure.Persistence;
 
@@ -10,9 +11,11 @@ using TrainTracking.Infrastructure.Persistence;
 namespace TrainTracking.Infrastructure.Migrations
 {
     [DbContext(typeof(TrainTrackingDbContext))]
-    partial class TrainTrackingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251230090529_AddTripPathPolyline")]
+    partial class AddTripPathPolyline
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");

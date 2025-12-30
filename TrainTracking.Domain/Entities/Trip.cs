@@ -24,4 +24,6 @@ public class Trip
     public DateTimeOffset ArrivalTime { get; set; }
     public TripStatus Status { get; set; } = TripStatus.Scheduled;
     public int? DelayMinutes { get; set; }
+    public DateTimeOffset? CancelledAt { get; set; }
+    public string? PathPolyline { get; set; }
 }

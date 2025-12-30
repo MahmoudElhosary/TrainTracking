@@ -8,7 +8,11 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
@@ -19,4 +23,500 @@ html {
 
 body {
   margin-bottom: 60px;
+}
+
+/* ================= PREMIUM MIDNIGHT GLASS THEME ================= */
+:root {
+  --bg-color: #f3f6f9;
+  --text-color: #2d3748;
+  --card-bg: #ffffff;
+  --navbar-bg: rgba(255, 255, 255, 0.95);
+  --footer-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --muted-text: #718096;
+  --input-bg: #ffffff;
+  --input-text: #2d3748;
+  --shadow-color: rgba(0, 0, 0, 0.06);
+  --primary-glow: transparent;
+  --glass-border: transparent;
+  --accent-color: #005eb8;
+}
+
+/* GLOBAL HELPERS & OVERRIDES */
+[data-theme="dark"] .bg-white {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .bg-light {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-color) !important;
+}
+
+[data-theme="dark"] {
+  /* Deep Void Blue & Glass Accents */
+  --bg-color: #0b0f19;
+  /* Ultra Deep Blue-Black */
+  --text-color: #e2e8f0;
+  /* Soft White */
+  --muted-text: #94a3b8;
+  /* Cool Grey */
+
+  /* Glassmorphism Configuration */
+  --card-bg: rgba(30, 41, 59, 0.7);
+  /* Translucent Slate */
+  --navbar-bg: rgba(11, 15, 25, 0.85);
+  /* Translucent Nav */
+  --footer-bg: #0f172a;
+
+  --border-color: #1e293b;
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+
+  --input-bg: rgba(15, 23, 42, 0.8);
+  --input-text: #f8fafc;
+
+  --shadow-color: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --primary-glow: 0 0 20px rgba(56, 189, 248, 0.15);
+  /* Soft Blue Glow */
+  --accent-color: #38bdf8;
+  /* Cyan-Blue for better contrast */
+}
+
+body {
+  background-color: var(--bg-color) !important;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.03) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.03) 0px, transparent 50%);
+  color: var(--text-color) !important;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* Glass Cards */
+.card {
+  background-color: var(--card-bg);
+  border: var(--glass-border);
+  backdrop-filter: blur(12px);
+  /* The Glass Effect */
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-color);
+  border-radius: 16px;
+  /* Softer Corners */
+}
+
+/* Glass Navbar */
+.navbar-custom {
+  background-color: var(--navbar-bg) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Inputs with Depth */
+.form-control,
+.form-select {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+/* Typography & Icons */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] .navbar-brand {
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .text-primary {
+  color: var(--accent-color) !important;
+  text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+  /* Glowing Text */
+}
+
+/* Navbar Links */
+[data-theme="dark"] .navbar-nav .nav-link {
+  color: #cbd5e1 !important;
+  transition: all 0.3s;
+}
+
+[data-theme="dark"] .navbar-nav .nav-link:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+}
+
+/* Table Enhancements */
+[data-theme="dark"] .table {
+  color: var(--text-color);
+}
+
+[data-theme="dark"] .table thead th {
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  color: var(--accent-color);
+}
+
+[data-theme="dark"] .table td {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Footer Fix */
+.footer {
+  background-color: var(--footer-bg) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Scrollbar (Modern Webkit) */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* User Capsule Layout */
+.user-capsule {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .user-capsule {
+  background: rgba(255, 255, 255, 0.05);
+  /* Glass effect */
+}
+
+.user-capsule:hover {
+  background: rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 10px var(--shadow-color);
+}
+
+[data-theme="dark"] .user-capsule:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.user-avatar-sm {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, var(--accent-color), #4f46e5);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.btn-icon-only {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.text-danger-soft {
+  color: #ef4444;
+  opacity: 0.8;
+}
+
+.btn-icon-only:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  transform: rotate(90deg);
+  /* Subtle interaction */
+}
+
+.highlight-link:hover {
+  color: var(--primary-force) !important;
+  text-shadow: 0 0 10px rgba(96, 165, 250, 0.2);
+}
+
+/* Premium Theme Toggle */
+.theme-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--border-color);
+  color: var(--text-color) !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Bouncy transition */
+  font-size: 1.2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ffd700 !important;
+  /* Sun Color */
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+  /* Sun Glow */
+}
+
+.theme-toggle-btn:hover {
+  transform: rotate(15deg) scale(1.1);
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+/* Rewards Points Badge */
+.points-badge {
+  background: rgba(255, 193, 7, 0.15);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  color: #ffc107;
+  font-size: 0.75rem;
+  transition: all 0.3s ease;
+  padding: 2px 8px;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+}
+
+[data-theme="dark"] .points-badge {
+  background: rgba(255, 193, 7, 0.2);
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
+.points-badge:hover {
+  transform: scale(1.05);
+  background: rgba(255, 193, 7, 0.25);
+}
+
+/* Logo Animations */
+.logo-img {
+  height: 50px;
+  width: auto;
+  mix-blend-mode: multiply;
+  filter: contrast(1.2) brightness(1.1);
+  animation: trainSlide 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
+  transform-origin: left center;
+}
+
+.logo-img:hover {
+  animation: shake 0.5s ease-in-out infinite;
+}
+
+@keyframes trainSlide {
+  0% {
+    transform: translateX(-100px) skewX(-20deg);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0) skewX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-2px);
+  }
+
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+
+/* Standalone Points Pill */
+.points-standalone {
+  background: #fff;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: default;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .points-standalone {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 193, 7, 0.2);
+}
+
+.points-standalone:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(255, 193, 7, 0.1) !important;
+  border-color: rgba(255, 193, 7, 0.6);
+}
+
+.coin-glow {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 193, 7, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  animation: gold-pulse 2s infinite;
+}
+
+@keyframes gold-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+  }
+
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 8px rgba(255, 193, 7, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+  }
+}
+
+[data-theme="dark"] .points-standalone .text-dark {
+  color: #fff !important;
+}
+
+/* Rewards Center & My Points Button */
+.points-standalone-btn {
+  background: #fff;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .points-standalone-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 193, 7, 0.2);
+}
+
+.points-standalone-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 15px rgba(255, 193, 7, 0.15) !important;
+  border-color: rgba(255, 193, 7, 0.8);
+  background: #fffdf5;
+}
+
+/* Visa-Style Card */
+.visa-points-card {
+  height: 240px;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  border-radius: 20px;
+  padding: 30px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  transition: all 0.5s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.visa-points-card:hover {
+  transform: translateY(-10px) rotateX(5deg) rotateY(-5deg);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+}
+
+.visa-chip {
+  width: 45px;
+  height: 35px;
+  background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+  border-radius: 6px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.card-logo {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.card-number {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1.4rem;
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.card-holder {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  opacity: 0.8;
+}
+
+.card-points-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.7;
+  margin-top: 5px;
+}
+
+.card-points-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-top: -5px;
+}
+
+.visa-card-bg-decoration {
+  position: absolute;
+  bottom: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.bg-soft-success {
+  background-color: rgba(40, 167, 69, 0.1);
+}
+
+.text-success {
+  color: #28a745 !important;
 }

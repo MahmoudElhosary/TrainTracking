@@ -1,4 +1,4 @@
-@model List<TrainTracking.Domain.Entities.Trip>
+@model List<TrainTracking.Application.DTOs.TripDto>
 @{
     ViewData["Title"] = "الرحلات القادمة";
 }
@@ -96,8 +96,8 @@
                                                     <i class="fas fa-subway fs-5"></i>
                                                 </div>
                                                 <div>
-                                                    <a asp-action="Details" asp-route-id="@trip.Id" class="fw-bold text-dark fs-6 text-decoration-none" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">@(trip.Train?.TrainNumber ?? "N/A")</a>
-                                                    <div class="small text-muted">@(trip.Train?.Type ?? "Unknown")</div>
+                                                    <a asp-action="Details" asp-route-id="@trip.Id" class="fw-bold text-dark fs-6 text-decoration-none" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">@(trip.TrainNumber ?? "N/A")</a>
+                                                    <div class="small text-muted">@(trip.TrainType ?? "Unknown")</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -105,11 +105,11 @@
                                             <div class="d-flex flex-column">
                                                 <div class="mb-1 d-flex align-items-center">
                                                     <i class="fas fa-circle text-success me-2" style="font-size: 8px;"></i>
-                                                    <span class="fw-semibold">@(trip.FromStation?.Name ?? "غير محدد")</span>
+                                                    <span class="fw-semibold">@(trip.FromStationName ?? "غير محدد")</span>
                                                 </div>
                                                 <div class="d-flex align-items-center">
                                                     <i class="fas fa-circle text-danger me-2" style="font-size: 8px;"></i>
-                                                    <span class="text-muted">@(trip.ToStation?.Name ?? "غير محدد")</span>
+                                                    <span class="text-muted">@(trip.ToStationName ?? "غير محدد")</span>
                                                 </div>
                                             </div>
                                         </td>
@@ -130,7 +130,7 @@
                                             </span>
                                         </td>
                                         <td class="px-4 py-3 text-center delay-cell">
-                                            @if (trip.DelayMinutes.HasValue && trip.DelayMinutes > 0)
+                                            @if (trip.DelayMinutes > 0)
                                             {
                                                 <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1 rounded-2">
                                                     <i class="fas fa-exclamation-triangle me-1"></i> +@trip.DelayMinutes دقيقة
@@ -142,7 +142,7 @@
                                             }
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            @if (trip.Status == TripStatus.Cancelled || trip.Status == TripStatus.Completed)
+                                            @if (trip.Status == TrainTracking.Domain.Entities.TripStatus.Cancelled || trip.Status == TrainTracking.Domain.Entities.TripStatus.Completed)
                                             {
                                                 <button class="btn btn-secondary btn-sm rounded-pill px-4 shadow-sm fw-bold opacity-50" disabled style="cursor: not-allowed;">
                                                     <i class="fas fa-ban me-1"></i> غير متاح
@@ -187,7 +187,7 @@
                                             <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-2 ms-2">
                                                 <i class="fas fa-train fs-5"></i>
                                             </div>
-                                            <span class="fw-bold fs-5">@trip.Train.TrainNumber</span>
+                                            <span class="fw-bold fs-5">@(trip.TrainNumber ?? "N/A")</span>
                                         </div>
                                         <span class="badge bg-soft-@statusClass text-@statusClass rounded-pill px-3 py-2">
                                             @statusText
@@ -197,17 +197,17 @@
                                     <div class="row g-3 mb-3">
                                         <div class="col-6">
                                             <small class="text-muted d-block">من</small>
-                                            <span class="fw-bold">@trip.FromStation.Name</span>
+                                            <span class="fw-bold">@(trip.FromStationName ?? "غير محدد")</span>
                                             <div class="text-primary fw-bold">@trip.DepartureTime.ToString("HH:mm")</div>
                                         </div>
                                         <div class="col-6 text-end">
                                             <small class="text-muted d-block">إلى</small>
-                                            <span class="fw-bold">@trip.ToStation.Name</span>
+                                            <span class="fw-bold">@(trip.ToStationName ?? "غير محدد")</span>
                                             <div class="text-muted small">@trip.ArrivalTime.ToString("HH:mm")</div>
                                         </div>
                                     </div>
 
-                                    @if (trip.DelayMinutes.HasValue && trip.DelayMinutes > 0)
+                                    @if (trip.DelayMinutes > 0)
                                     {
                                         <div class="alert alert-danger py-2 px-3 mb-3 d-flex align-items-center small bg-opacity-10 border-0 text-danger rounded-3">
                                             <i class="fas fa-exclamation-triangle me-2"></i>
@@ -216,7 +216,7 @@
                                     }
 
                                     <div class="d-grid">
-                                        @if (trip.Status == TripStatus.Cancelled || trip.Status == TripStatus.Completed)
+                                        @if (trip.Status == TrainTracking.Domain.Entities.TripStatus.Cancelled || trip.Status == TrainTracking.Domain.Entities.TripStatus.Completed)
                                         {
                                             <button class="btn btn-secondary rounded-pill fw-bold opacity-50" disabled>
                                                 <i class="fas fa-ban me-1"></i> غير متاح
@@ -331,11 +331,11 @@
             // Get Trip data for simulation
             var trips = @(Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Select(t => new {
                 id = t.Id,
-                from = new { name = t.FromStation?.Name, lat = t.FromStation?.Latitude ?? 0, lng = t.FromStation?.Longitude ?? 0 },
-                to = new { name = t.ToStation?.Name, lat = t.ToStation?.Latitude ?? 0, lng = t.ToStation?.Longitude ?? 0 },
+                from = new { name = t.FromStationName, lat = t.FromStationLatitude, lng = t.FromStationLongitude },
+                to = new { name = t.ToStationName, lat = t.ToStationLatitude, lng = t.ToStationLongitude },
                 departure = t.DepartureTime.ToUnixTimeMilliseconds(),
                 arrival = t.ArrivalTime.ToUnixTimeMilliseconds(),
-                trainNumber = t.Train.TrainNumber
+                trainNumber = t.TrainNumber
             }))));
 
             var trainIcon = L.divIcon({

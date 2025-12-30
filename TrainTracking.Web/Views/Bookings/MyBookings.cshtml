@@ -3,9 +3,10 @@
 
 @{
     ViewData["Title"] = "حجوزاتي";
-    var activeBookings = Model.Where(b => b.Status == BookingStatus.Confirmed).ToList();
-    var cancelledBookings = Model.Where(b => b.Status == BookingStatus.Cancelled).ToList();
-    var allBookings = Model.ToList();
+    var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(3));
+    var activeBookings = Model.Where(b => b.Status == BookingStatus.Confirmed && (b.Trip?.DepartureTime > now)).ToList();
+    var cancelledBookings = Model.Where(b => b.Status == BookingStatus.Cancelled && (b.Trip?.DepartureTime > now)).ToList();
+    var allBookings = Model.Where(b => (b.Trip?.DepartureTime > now)).ToList();
 }
 
 <div class="container py-5">

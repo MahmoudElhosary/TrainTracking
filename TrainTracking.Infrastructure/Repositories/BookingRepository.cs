@@ -97,5 +97,18 @@ namespace TrainTracking.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task CreateRedemptionAsync(PointRedemption redemption)
+        {
+            await _context.PointRedemptions.AddAsync(redemption);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> GetRedeemedPointsAsync(string userId)
+        {
+            return await _context.PointRedemptions
+                .Where(pr => pr.UserId == userId)
+                .SumAsync(pr => pr.PointsRedeemed);
+        }
     }
 }

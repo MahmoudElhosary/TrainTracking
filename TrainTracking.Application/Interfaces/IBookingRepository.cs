@@ -14,5 +14,9 @@ namespace TrainTracking.Application.Interfaces
         Task<List<int>> GetTakenSeatsAsync(Guid tripId);
         Task UpdateAsync(Booking booking);
         Task DeleteAsync(Guid id);
+        
+        // Point Redemption
+        Task CreateRedemptionAsync(PointRedemption redemption);
+        Task<int> GetRedeemedPointsAsync(string userId);
     }
 }

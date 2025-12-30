@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TrainTracking.Application.Interfaces;
+using TrainTracking.Domain.Enums;
 using TrainTracking.Domain.Entities;
+using TrainTracking.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace TrainTracking.Web.Controllers
 {
@@ -14,10 +17,14 @@ namespace TrainTracking.Web.Controllers
         private readonly IBookingRepository _bookingRepository;
         private readonly ISmsService _smsService;
         private readonly INotificationRepository _notificationRepository;
+        private readonly TrainTrackingDbContext _context;
+        private readonly IDateTimeService _dateTimeService;
+        private readonly ITripService _tripService;
 
         public AdminController(ITripRepository tripRepository, ITrainRepository trainRepository, 
             IStationRepository stationRepository, IBookingRepository bookingRepository, ISmsService smsService,
-            INotificationRepository notificationRepository)
+            INotificationRepository notificationRepository, TrainTrackingDbContext context, IDateTimeService dateTimeService,
+            ITripService tripService)
         {
             _tripRepository = tripRepository;
             _trainRepository = trainRepository;
@@ -25,16 +32,66 @@ namespace TrainTracking.Web.Controllers
             _bookingRepository = bookingRepository;
             _smsService = smsService;
             _notificationRepository = notificationRepository;
+            _context = context;
+            _dateTimeService = dateTimeService;
+            _tripService = tripService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            await PurgeStaleTrips();
+
+            // Total Stats
+            var revenueData = await _context.Bookings
+                .Where(b => b.Status == BookingStatus.Confirmed)
+                .Select(b => b.Price)
+                .ToListAsync();
+            ViewBag.TotalRevenue = revenueData.Sum();
+
+            ViewBag.TotalBookings = await _context.Bookings.CountAsync();
+            var now = _dateTimeService.Now;
+            
+            ViewBag.ActiveTrips = await _context.Trips
+                .Where(t => t.DepartureTime > now && t.Status != TripStatus.Completed)
+                .CountAsync();
+            ViewBag.TotalUsers = await _context.Users.CountAsync();
+
+            // Recent Bookings
+            var recentBookings = await _context.Bookings
+                .Include(b => b.Trip)
+                .OrderByDescending(b => b.BookingDate)
+                .Take(5)
+                .ToListAsync();
+
+            // Data for Charts (Last 7 Days)
+            var last7Days = Enumerable.Range(0, 7)
+                .Select(i => now.Date.AddDays(-i))
+                .OrderBy(d => d)
+                .ToList();
+
+            var chartData = new List<int>();
+            var chartLabels = new List<string>();
+
+            foreach (var day in last7Days)
+            {
+                var startOfDay = day.Date;
+                var endOfDay = startOfDay.AddDays(1);
+                var count = await _context.Bookings
+                    .CountAsync(b => b.BookingDate >= startOfDay && b.BookingDate < endOfDay);
+                chartData.Add(count);
+                chartLabels.Add(day.ToString("MMM dd"));
+            }
+
+            ViewBag.ChartData = chartData;
+            ViewBag.ChartLabels = chartLabels;
+
+            return View(recentBookings);
         }
 
         // --- Trips Management ---
         public async Task<IActionResult> Trips()
         {
+            await PurgeStaleTrips();
             var trips = await _tripRepository.GetUpcomingTripsAsync();
             return View(trips);
         }
@@ -51,11 +108,9 @@ namespace TrainTracking.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Adjust times to Kuwait (+3) if they don't have an offset
-                // datetime-local sends "2025-12-28T11:27" which binds as local or UTC with 0 offset
-                var offset = TimeSpan.FromHours(3);
-                trip.DepartureTime = new DateTimeOffset(trip.DepartureTime.DateTime, offset);
-                trip.ArrivalTime = new DateTimeOffset(trip.ArrivalTime.DateTime, offset);
+                // Adjust times to Kuwait (+3) using DateTimeService
+                trip.DepartureTime = new DateTimeOffset(trip.DepartureTime.DateTime, _dateTimeService.Now.Offset);
+                trip.ArrivalTime = new DateTimeOffset(trip.ArrivalTime.DateTime, _dateTimeService.Now.Offset);
 
                 await _tripRepository.AddAsync(trip);
                 return RedirectToAction(nameof(Trips));
@@ -65,6 +120,26 @@ namespace TrainTracking.Web.Controllers
             return View(trip);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetCalculatedArrivalTime(Guid fromStationId, Guid toStationId, DateTime departureTime)
+        {
+            try
+            {
+                // Use the Kuwait offset
+                var departureOffset = new DateTimeOffset(departureTime, _dateTimeService.Now.Offset);
+                var arrivalTime = await _tripService.CalculateArrivalTimeAsync(fromStationId, toStationId, departureOffset);
+                
+                return Json(new { 
+                    success = true, 
+                    arrivalTime = arrivalTime.ToString("yyyy-MM-ddTHH:mm"),
+                    displayTime = arrivalTime.ToString("HH:mm")
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
         public async Task<IActionResult> EditTrip(Guid id)
         {
             var trip = await _tripRepository.GetTripWithStationsAsync(id);
@@ -80,9 +155,13 @@ namespace TrainTracking.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var offset = TimeSpan.FromHours(3);
-                trip.DepartureTime = new DateTimeOffset(trip.DepartureTime.DateTime, offset);
-                trip.ArrivalTime = new DateTimeOffset(trip.ArrivalTime.DateTime, offset);
+                trip.DepartureTime = new DateTimeOffset(trip.DepartureTime.DateTime, _dateTimeService.Now.Offset);
+                trip.ArrivalTime = new DateTimeOffset(trip.ArrivalTime.DateTime, _dateTimeService.Now.Offset);
+
+                if (trip.Status == TripStatus.Cancelled && trip.CancelledAt == null)
+                {
+                    trip.CancelledAt = _dateTimeService.Now;
+                }
 
                 await _tripRepository.UpdateAsync(trip);
 
@@ -279,6 +358,40 @@ namespace TrainTracking.Web.Controllers
         {
             var notifications = await _notificationRepository.GetAllAsync();
             return View(notifications);
+        }
+
+        private async Task PurgeStaleTrips()
+        {
+            try
+            {
+                var now = _dateTimeService.Now;
+
+                // Fetch trips and filter in-memory to bypass SQLite's DateTimeOffset string comparison quirks
+                var trips = await _context.Trips.ToListAsync();
+                var staleTrips = trips.Where(t => t.DepartureTime < now.AddMinutes(-30)).ToList();
+
+                if (staleTrips.Any())
+                {
+                    var staleIds = staleTrips.Select(t => t.Id).ToList();
+                    
+                    // Related bookings
+                    var bookings = await _context.Bookings.Where(b => staleIds.Contains(b.TripId)).ToListAsync();
+                    _context.Bookings.RemoveRange(bookings);
+
+                    // Related notifications
+                    var notifications = await _context.Notifications.Where(n => n.TripId.HasValue && staleIds.Contains(n.TripId.Value)).ToListAsync();
+                    _context.Notifications.RemoveRange(notifications);
+
+                    _context.Trips.RemoveRange(staleTrips);
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine($"[PURGE]: Successfully deleted {staleTrips.Count} stale trips.");
+                }
+            }
+            catch (Exception ex)
+            {
+                // In a real app, use logger. For now, we'll just print to console for debugging
+                Console.WriteLine($"[PURGE ERROR]: {ex.Message}");
+            }
         }
     }
 }
