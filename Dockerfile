@@ -15,19 +15,20 @@ RUN dotnet restore
 # Copy all source code
 COPY . .
 
-# Build and publish for Linux x64
+# Build and publish
 WORKDIR /src/TrainTracking.Web
-RUN dotnet publish -c Release -r linux-x64 --self-contained false -o /app/publish
+RUN dotnet publish -c Release -o /app/publish
 
 # Runtime Stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
-# Install native dependencies for SkiaSharp/QuestPDF
+# Install ALL possible native dependencies for SkiaSharp/QuestPDF
 RUN apt-get update && apt-get install -y \
     libfontconfig1 \
     libfreetype6 \
     libicu-dev \
     libx11-6 \
     libglib2.0-0 \
+    libssl3 \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
@@ -37,8 +38,8 @@ COPY --from=build /app/publish .
 # Environment variables for Railway
 ENV ASPNETCORE_ENVIRONMENT=Production
 
-# Expose port (Documentation only, Railway uses PORT env)
-EXPOSE 8080
+# Railway automatically sets PORT. ASP.NET Core picks up PORT env and maps to 8080 by default.
+# We will use explicit binding in Program.cs as a failsafe.
 
 # Run the application
 ENTRYPOINT ["dotnet", "TrainTracking.Web.dll"]
