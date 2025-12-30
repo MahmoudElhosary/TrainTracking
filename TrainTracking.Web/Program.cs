@@ -19,6 +19,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+Console.WriteLine($"[KuwGo] Starting on port {port}");
+builder.WebHost.UseUrls($"http://*:{port}");
 Console.WriteLine($"[KuwGo] Running in {builder.Environment.EnvironmentName} environment");
 
 // Identity Configuration
@@ -98,11 +101,21 @@ if (app.Environment.IsDevelopment())
 else
 {
     // In Production, just ensure the database is created
+    Console.WriteLine("[KuwGo] Ensuring database is created...");
     using (var scope = app.Services.CreateScope())
     {
-        var context = scope.ServiceProvider.GetRequiredService<TrainTrackingDbContext>();
-        context.Database.EnsureCreated();
+        try 
+        {
+            var context = scope.ServiceProvider.GetRequiredService<TrainTrackingDbContext>();
+            context.Database.EnsureCreated();
+            Console.WriteLine("[KuwGo] Database is ready.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[KuwGo] ERROR during database creation: {ex.Message}");
+        }
     }
 }
 
+Console.WriteLine("[KuwGo] Application starting up...");
 app.Run();

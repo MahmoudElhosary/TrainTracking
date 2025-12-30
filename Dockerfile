@@ -36,9 +36,8 @@ COPY --from=build /app/publish .
 
 # Environment variables for Railway
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ASPNETCORE_URLS=http://+:8080
 
-# Expose port
+# Expose port (Documentation only, Railway uses PORT env)
 EXPOSE 8080
 
 # Run the application
