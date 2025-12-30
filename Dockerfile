@@ -21,6 +21,7 @@ RUN dotnet publish -c Release -o /app/publish
 
 # Runtime Stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+RUN apt-get update && apt-get install -y libfontconfig1 libicu-dev && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Copy published files
