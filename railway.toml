@@ -1,4 +1,8 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "./Dockerfile"
-watchPatterns = ["**/*"]
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+numReplicas = 1

@@ -11,6 +11,13 @@ namespace TrainTracking.Web.Controllers
             return View();
         }
 
+        // Health check endpoint for Railway
+        [Route("/health")]
+        public IActionResult Health()
+        {
+            return Ok("Healthy");
+        }
+
         public IActionResult Privacy()
         {
             return View();

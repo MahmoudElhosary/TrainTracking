@@ -26,10 +26,11 @@ WORKDIR /app
 # Copy published files
 COPY --from=build /app/publish .
 
-# Expose port
-EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
+# Railway uses PORT environment variable
 ENV ASPNETCORE_ENVIRONMENT=Production
 
-# Run the application
-ENTRYPOINT ["dotnet", "TrainTracking.Web.dll"]
+# Expose port (Railway will set PORT dynamically)
+EXPOSE 8080
+
+# Run the application with dynamic port binding
+ENTRYPOINT ["sh", "-c", "dotnet TrainTracking.Web.dll --urls=http://+:${PORT:-8080}"]
