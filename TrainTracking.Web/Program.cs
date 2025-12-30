@@ -101,25 +101,27 @@ try
             }
         }
     }
-    else
-    {
-        // In Production, just ensure the database is created
-        Console.WriteLine("[KuwGo] Ensuring database is created...");
+        // In Production, just ensure the database is created and seed the admin user
+        Console.WriteLine("[KuwGo] Ensuring database is created and admin exists...");
         using (var scope = app.Services.CreateScope())
         {
             try 
             {
                 var context = scope.ServiceProvider.GetRequiredService<TrainTrackingDbContext>();
                 context.Database.EnsureCreated();
-                Console.WriteLine("[KuwGo] Database is created/verified.");
+                
+                var userManager = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<Microsoft.AspNetCore.Identity.IdentityUser>>();
+                var roleManager = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole>>();
+                await DbInitializer.Seed(context, userManager, roleManager);
+                
+                Console.WriteLine("[KuwGo] Database and Admin seeding completed.");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[KuwGo] CRITICAL ERROR during database initialization: {ex.Message}");
-                throw; // Rethrow to catch in global handler
+                throw; 
             }
         }
-    }
 
     Console.WriteLine("[KuwGo] STARTING SERVER...");
     app.Run();
