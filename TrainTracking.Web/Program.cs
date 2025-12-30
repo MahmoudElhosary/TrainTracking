@@ -81,47 +81,30 @@ try
         pattern: "{controller=Home}/{action=Index}/{id?}");
     app.MapHub<TripHub>("/tripHub");
 
-    // Seed Database (only in Development)
-    if (app.Environment.IsDevelopment())
+    // Initialize Database and Seed Essential Data (Admin Account, basic roles)
+    Console.WriteLine("[KuwGo] Initializing database and essential data...");
+    using (var scope = app.Services.CreateScope())
     {
-        using (var scope = app.Services.CreateScope())
+        var services = scope.ServiceProvider;
+        try
         {
-            var services = scope.ServiceProvider;
-            try
-            {
-                var context = services.GetRequiredService<TrainTrackingDbContext>();
-                var userManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<Microsoft.AspNetCore.Identity.IdentityUser>>();
-                var roleManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole>>();
-                await DbInitializer.Seed(context, userManager, roleManager);
-            }
-            catch (Exception ex)
-            {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(ex, "An error occurred while seeding the database.");
-            }
+            var context = services.GetRequiredService<TrainTrackingDbContext>();
+            var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            
+            // This will handle Migrations and then Seed Roles/Admin
+            await DbInitializer.Seed(context, userManager, roleManager);
+            
+            Console.WriteLine("[KuwGo] Database and Admin seeding completed successfully.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[KuwGo] ERROR during database initialization: {ex.Message}");
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "An error occurred while seeding the database.");
+            // Don't throw in development, but maybe we should let it run
         }
     }
-        // In Production, just ensure the database is created and seed the admin user
-        Console.WriteLine("[KuwGo] Ensuring database is created and admin exists...");
-        using (var scope = app.Services.CreateScope())
-        {
-            try 
-            {
-                var context = scope.ServiceProvider.GetRequiredService<TrainTrackingDbContext>();
-                context.Database.EnsureCreated();
-                
-                var userManager = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<Microsoft.AspNetCore.Identity.IdentityUser>>();
-                var roleManager = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole>>();
-                await DbInitializer.Seed(context, userManager, roleManager);
-                
-                Console.WriteLine("[KuwGo] Database and Admin seeding completed.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[KuwGo] CRITICAL ERROR during database initialization: {ex.Message}");
-                throw; 
-            }
-        }
 
     Console.WriteLine("[KuwGo] STARTING SERVER...");
     app.Run();
