@@ -31,8 +31,10 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {
 .AddDefaultTokenProviders();
 
 
+// Configure SQLite with proper path for Railway/Docker
+var dbPath = Environment.GetEnvironmentVariable("DATABASE_PATH") ?? "traintracking.db";
 builder.Services.AddDbContext<TrainTrackingDbContext>(options =>
-    options.UseSqlite("Data Source=traintracking.db"));
+    options.UseSqlite($"Data Source={dbPath}"));
 
 builder.Services.AddScoped<ITrainRepository, TrainRepository>();
 builder.Services.AddScoped<ITripRepository, TripRepository>();
