@@ -1,0 +1,3 @@
+# Disable nixpacks - use Dockerfile instead
+[phases.build]
+cmds = []
