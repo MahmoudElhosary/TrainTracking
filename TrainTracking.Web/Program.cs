@@ -73,21 +73,33 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapHub<TripHub>("/tripHub");
 
-// Seed Database
-using (var scope = app.Services.CreateScope())
+// Seed Database (only in Development)
+if (app.Environment.IsDevelopment())
 {
-    var services = scope.ServiceProvider;
-    try
+    using (var scope = app.Services.CreateScope())
     {
-        var context = services.GetRequiredService<TrainTrackingDbContext>();
-        var userManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<Microsoft.AspNetCore.Identity.IdentityUser>>();
-        var roleManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole>>();
-        await DbInitializer.Seed(context, userManager, roleManager);
+        var services = scope.ServiceProvider;
+        try
+        {
+            var context = services.GetRequiredService<TrainTrackingDbContext>();
+            var userManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<Microsoft.AspNetCore.Identity.IdentityUser>>();
+            var roleManager = services.GetRequiredService<Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole>>();
+            await DbInitializer.Seed(context, userManager, roleManager);
+        }
+        catch (Exception ex)
+        {
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "An error occurred while seeding the database.");
+        }
     }
-    catch (Exception ex)
+}
+else
+{
+    // In Production, just ensure the database is created
+    using (var scope = app.Services.CreateScope())
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        var context = scope.ServiceProvider.GetRequiredService<TrainTrackingDbContext>();
+        context.Database.EnsureCreated();
     }
 }
 
