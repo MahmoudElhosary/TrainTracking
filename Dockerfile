@@ -15,9 +15,9 @@ RUN dotnet restore
 # Copy all source code
 COPY . .
 
-# Build and publish
+# Build and publish for Linux x64
 WORKDIR /src/TrainTracking.Web
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish -c Release -r linux-x64 --self-contained false -o /app/publish
 
 # Runtime Stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
@@ -25,7 +25,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 RUN apt-get update && apt-get install -y \
     libfontconfig1 \
     libfreetype6 \
-    libicu-dev \
+    libicu72 \
     libx11-6 \
     libglib2.0-0 \
     libssl3 \
