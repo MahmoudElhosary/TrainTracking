@@ -43,7 +43,7 @@ try
     .AddDefaultTokenProviders();
 
     // Configure SQLite with proper path for Railway/Docker
-    var dbPath = Environment.GetEnvironmentVariable("DATABASE_PATH") ?? "traintracking.db";
+    var dbPath = Environment.GetEnvironmentVariable("DATABASE_PATH") ?? "kuwgo_v2.db";
     builder.Services.AddDbContext<TrainTrackingDbContext>(options =>
         options.UseSqlite($"Data Source={dbPath}"));
 
