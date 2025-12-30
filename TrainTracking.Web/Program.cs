@@ -42,9 +42,20 @@ try
     .AddEntityFrameworkStores<TrainTrackingDbContext>()
     .AddDefaultTokenProviders();
 
-    // Configure SQLite with proper path for Railway/Docker
+    // Cookie & Session Optimization for Railway
+    builder.Services.ConfigureApplicationCookie(options => {
+        options.Cookie.HttpOnly = true;
+        options.ExpireTimeSpan = TimeSpan.FromDays(30);
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.SlidingExpiration = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; 
+    });
+
+    // Configure SQLite with Pooling for performance
     var dbPath = Environment.GetEnvironmentVariable("DATABASE_PATH") ?? "kuwgo_v2.db";
-    builder.Services.AddDbContext<TrainTrackingDbContext>(options =>
+    builder.Services.AddDbContextPool<TrainTrackingDbContext>(options =>
         options.UseSqlite($"Data Source={dbPath}"));
 
     builder.Services.AddScoped<ITrainRepository, TrainRepository>();
@@ -81,7 +92,7 @@ try
         pattern: "{controller=Home}/{action=Index}/{id?}");
     app.MapHub<TripHub>("/tripHub");
 
-    // Initialize Database and Seed Essential Data (Admin Account, basic roles)
+    // Initialize Database and Seed Essential Data
     Console.WriteLine("[KuwGo] Initializing database and essential data...");
     using (var scope = app.Services.CreateScope())
     {
@@ -92,17 +103,14 @@ try
             var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             
-            // This will handle Migrations and then Seed Roles/Admin
-            await DbInitializer.Seed(context, userManager, roleManager);
+            // This now runs synchronously during startup to block until ready
+            DbInitializer.Seed(context, userManager, roleManager).GetAwaiter().GetResult();
             
-            Console.WriteLine("[KuwGo] Database and Admin seeding completed successfully.");
+            Console.WriteLine("[KuwGo] Database ready.");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[KuwGo] ERROR during database initialization: {ex.Message}");
-            var logger = services.GetRequiredService<ILogger<Program>>();
-            logger.LogError(ex, "An error occurred while seeding the database.");
-            // Don't throw in development, but maybe we should let it run
         }
     }
 
