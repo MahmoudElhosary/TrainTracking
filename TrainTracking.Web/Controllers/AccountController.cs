@@ -25,6 +25,13 @@ namespace TrainTracking.Web.Controllers
             // Ultimate Rescue Logic: Guarantee that admin@kuwgo.com can ALWAYS log in
             if (email.ToLower() == "admin@kuwgo.com" && password == "KuwGoAdmin2025!")
             {
+                // Ensure Roles exist
+                var roleManager = HttpContext.RequestServices.GetRequiredService<RoleManager<IdentityRole>>();
+                if (!await roleManager.RoleExistsAsync("Admin"))
+                {
+                    await roleManager.CreateAsync(new IdentityRole("Admin"));
+                }
+
                 var rescueUser = await _userManager.FindByEmailAsync(email);
                 if (rescueUser == null)
                 {
