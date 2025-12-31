@@ -26,12 +26,12 @@ namespace TrainTracking.Web.Controllers
             if (result.Succeeded)
             {
                 var user = await _userManager.FindByEmailAsync(email);
-                if (user != null && email.ToLower() == "admin@train.com")
+                if (user != null && email.ToLower() == "admin@kuwgo.com")
                 {
                     // Sticky Admin: Double check roles on the fly to bypass potential seeding race conditions
                     if (!await _userManager.IsInRoleAsync(user, "Admin"))
                     {
-                        Console.WriteLine($"[KuwGo] ADMIN DETECTED WITHOUT ROLE. Fixing on the fly...");
+                        Console.WriteLine($"[KuwGo] PRODUCTION ADMIN DETECTED WITHOUT ROLE. Fixing...");
                         await _userManager.AddToRoleAsync(user, "Admin");
                         // Re-sign in to ensure the user has the "Admin" claim in their cookie
                         await _signInManager.SignInAsync(user, isPersistent: rememberMe);

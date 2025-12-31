@@ -107,38 +107,34 @@ public static class DbInitializer
             }
         }
 
-        // Seed Admin User (HARD RESET logic)
-        var adminEmail = "admin@train.com";
-        Console.WriteLine($"[KuwGo] Checking for existing admin: {adminEmail}");
-        
+        // Seed Admin User (Fresh for Production)
+        var adminEmail = "admin@kuwgo.com";
         var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
-        if (existingAdmin != null)
-        {
-            Console.WriteLine("[KuwGo] Found existing admin. Deleting for Hard Reset...");
-            await userManager.DeleteAsync(existingAdmin);
-        }
-
-        Console.WriteLine("[KuwGo] Creating fresh admin account...");
-        var user = new IdentityUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true
-        };
         
-        var result = await userManager.CreateAsync(user, "Admin1234!");
-        if (result.Succeeded)
+        if (existingAdmin == null)
         {
-            await userManager.AddToRoleAsync(user, "Admin");
-            Console.WriteLine("=================================================");
-            Console.WriteLine("[KuwGo] ADMIN ACCOUNT HARD RESET SUCCESSFUL");
-            Console.WriteLine($"[KuwGo] Email: {adminEmail}");
-            Console.WriteLine("[KuwGo] Password: Admin1234!");
-            Console.WriteLine("=================================================");
-        }
-        else
-        {
-            Console.WriteLine($"[KuwGo] CRITICAL FAILED to create admin: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            Console.WriteLine($"[KuwGo] Creating fresh production admin: {adminEmail}...");
+            var user = new IdentityUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true
+            };
+            
+            var result = await userManager.CreateAsync(user, "KuwGoAdmin2025!");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(user, "Admin");
+                Console.WriteLine("=================================================");
+                Console.WriteLine("[KuwGo] PRODUCTION ADMIN CREATED SUCCESSFULLY");
+                Console.WriteLine($"[KuwGo] Email: {adminEmail}");
+                Console.WriteLine("[KuwGo] Password: KuwGoAdmin2025!");
+                Console.WriteLine("=================================================");
+            }
+            else
+            {
+                Console.WriteLine($"[KuwGo] FAILED to create production admin: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+            }
         }
     }
 }
