@@ -25,6 +25,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 RUN apt-get update && apt-get install -y \
     libfontconfig1 \
     libfreetype6 \
+    fontconfig \
+    fonts-liberation \
     libicu72 \
     libx11-6 \
     libglib2.0-0 \
