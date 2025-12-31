@@ -55,7 +55,7 @@
     </style>
 </head>
 <body>
-    <header class="d-lg-none">
+    <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3 navbar-custom">
             <div class="container">
                 <!-- Brand -->
@@ -66,117 +66,34 @@
                     </div>
                 </a>
 
-                <!-- Mobile Toggle button -->
+                <!-- Desktop Navigation (Center) -->
+                <div class="collapse navbar-collapse d-none d-lg-flex justify-content-center">
+                    <ul class="navbar-nav @(isRTL ? "ms-auto" : "me-auto")">
+                        <li class="nav-item mx-2"><a class="nav-link py-3 fw-semibold @(Context.Request.Path == "/" ? "text-primary border-bottom border-primary" : "")" asp-controller="Home" asp-action="Index">@Localizer["Home"]</a></li>
+                        <li class="nav-item mx-2"><a class="nav-link py-3 fw-semibold @(Context.Request.Path.StartsWithSegments("/Trips") && Context.Request.Path != "/Trips/Live" ? "text-primary border-bottom border-primary" : "")" asp-controller="Trips" asp-action="Index">@Localizer["Trips"]</a></li>
+                        <li class="nav-item mx-2"><a class="nav-link py-3 fw-bold text-success @(Context.Request.Path == "/Trips/Live" ? "border-bottom border-success" : "")" asp-controller="Trips" asp-action="Live"><i class="fas fa-satellite-dish me-1"></i> @Localizer["LiveTracking"]</a></li>
+                    </ul>
+                </div>
+
+                <!-- Right Actions -->
                 <div class="d-flex align-items-center">
-                     <!-- Language Toggle Mobile -->
-                    <form asp-controller="Culture" asp-action="SetLanguage" method="post" class="me-2">
-                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                        <button type="submit" name="culture" value="@(isRTL ? "en-US" : "ar-KW")" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold">
-                            @(isRTL ? "EN" : "عربي")
-                        </button>
-                    </form>
-                    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
-                        <span class="navbar-toggler-icon"></span>
+                    <!-- Hamburger Menu Button (Open Sidebar) -->
+                    <button class="btn btn-link text-dark shadow-none p-2 border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
+                        <i class="fas fa-bars fa-lg"></i>
                     </button>
                 </div>
             </div>
         </nav>
     </header>
 
-    <!-- Desktop Sidebar (Persistent) -->
-    <aside class="sidebar-desktop d-none d-lg-flex">
-        <div class="sidebar-branding">
-            <a class="navbar-brand d-flex align-items-center text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index">
-                <div class="logo-wrapper">
-                    <i class="fas fa-train logo-icon"></i>
-                    <span class="logo-text ms-1 font-outfit">Kuw<span class="text-primary-go">Go</span></span>
-                </div>
-            </a>
-        </div>
-
-        <nav class="flex-column">
-            <a class="nav-link @(Context.Request.Path == "/" ? "active bg-light" : "")" asp-controller="Home" asp-action="Index">
-                <i class="fas fa-home me-3 text-primary"></i> @Localizer["Home"]
-            </a>
-            <a class="nav-link @(Context.Request.Path.StartsWithSegments("/Trips") && Context.Request.Path != "/Trips/Live" ? "active bg-light" : "")" asp-controller="Trips" asp-action="Index">
-                <i class="fas fa-route me-3 text-info"></i> @Localizer["Trips"]
-            </a>
-            <a class="nav-link @(Context.Request.Path == "/Trips/Live" ? "active bg-light" : "") text-success fw-bold" asp-controller="Trips" asp-action="Live">
-                <i class="fas fa-satellite-dish me-3"></i> @Localizer["LiveTracking"]
-            </a>
-            
-            @if (User.IsInRole("Admin"))
-            {
-                <div class="dropdown-divider mx-4 my-3 opacity-10"></div>
-                <a class="nav-link text-primary fw-bold" asp-controller="Admin" asp-action="Index">
-                    <i class="fas fa-tools me-3"></i> @Localizer["Dashboard"]
-                </a>
-            }
-
-            <div class="dropdown-divider mx-4 my-3 opacity-10"></div>
-            
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <a class="nav-link @(Context.Request.Path == "/Bookings/MyBookings" ? "active bg-light" : "")" asp-controller="Bookings" asp-action="MyBookings">
-                    <i class="fas fa-ticket-alt me-3 text-warning"></i> @Localizer["MyBookings"]
-                </a>
-            }
-        </nav>
-
-        <!-- User section -->
-        <div class="sidebar-user-card mx-3 my-4">
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <div class="d-flex align-items-center mb-3">
-                    <div class="user-avatar-sm me-3">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="overflow-hidden">
-                        <h6 class="mb-0 text-truncate small fw-bold">@User.Identity?.Name</h6>
-                        <span class="x-small text-muted" style="font-size: 0.7rem;">@points @Localizer["Points"]</span>
-                    </div>
-                </div>
-                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
-                    <button type="submit" class="btn btn-sm btn-outline-danger w-100 rounded-pill">
-                        <i class="fas fa-power-off me-1"></i> @Localizer["Logout"]
-                    </button>
-                </form>
-            }
-            else
-            {
-                <a asp-controller="Account" asp-action="Login" class="btn btn-primary w-100 rounded-pill shadow-sm py-2">
-                    <i class="fas fa-sign-in-alt me-2"></i> @Localizer["Login"]
-                </a>
-            }
-        </div>
-
-        <!-- Controls Footer -->
-        <div class="sidebar-footer mt-auto bg-light bg-opacity-10">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <span class="small fw-bold">@Localizer["Appearance"]</span>
-                <button id="themeToggle" class="btn theme-toggle-btn rounded-circle" style="width: 38px; height: 38px;">
-                    <i class="fas fa-moon"></i>
-                </button>
-            </div>
-            
-            <div class="language-selector p-1 bg-white dark-bg-glass border rounded-pill d-flex">
-                <form asp-controller="Culture" asp-action="SetLanguage" method="post" class="w-100 d-flex m-0">
-                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                    <button type="submit" name="culture" value="ar-KW" class="btn @(isRTL ? "btn-primary" : "btn-link text-dark text-decoration-none") flex-grow-1 btn-sm rounded-pill fw-bold">AR</button>
-                    <button type="submit" name="culture" value="en-US" class="btn @(!isRTL ? "btn-primary" : "btn-link text-dark text-decoration-none") flex-grow-1 btn-sm rounded-pill fw-bold">EN</button>
-                </form>
-            </div>
-        </div>
-    </aside>
-
-    <div class="main-wrapper-sidebar">
+    <div class="container-fluid p-0">
         <!-- Main Content Area -->
         <main role="main" class="pb-3 px-3 px-lg-4">
             @RenderBody()
         </main>
     </div>
-        <!-- Premium Mobile Sidebar (Offcanvas) -->
-        <div class="offcanvas offcanvas-@(isRTL ? "start" : "end") border-0 sidebar-offcanvas d-lg-none" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+        <!-- Settings Sidebar (Offcanvas) -->
+        <div class="offcanvas offcanvas-@(isRTL ? "start" : "end") border-0 sidebar-offcanvas" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
             <div class="offcanvas-header border-bottom py-4">
                 <div class="d-flex align-items-center">
                     <div class="logo-wrapper scale-75">
@@ -227,18 +144,6 @@
 
                 <!-- Navigation List -->
                 <div class="list-group list-group-flush py-2 text-@(isRTL ? "start" : "start")">
-                    <a asp-controller="Home" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
-                        <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-primary"><i class="fas fa-home"></i></div>
-                        @Localizer["Home"]
-                    </a>
-                    <a asp-controller="Trips" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
-                        <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-info"><i class="fas fa-train"></i></div>
-                        @Localizer["Trips"]
-                    </a>
-                    <a asp-controller="Trips" asp-action="Live" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center text-success fw-bold">
-                        <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-success"><i class="fas fa-map-marker-alt"></i></div>
-                        @Localizer["LiveTracking"]
-                    </a>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         <a asp-controller="Bookings" asp-action="MyBookings" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
@@ -248,7 +153,6 @@
                     }
                     @if (User.IsInRole("Admin"))
                     {
-                        <div class="dropdown-divider mx-4 my-2"></div>
                         <a asp-controller="Admin" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center text-primary fw-bold">
                             <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-primary"><i class="fas fa-tools"></i></div>
                             @Localizer["Dashboard"]
@@ -256,13 +160,21 @@
                     }
                 </div>
 
-                <!-- Footer Section (Theme Toggle) -->
+                <!-- Footer Section (Theme & Language) -->
                 <div class="mt-auto p-4 border-top">
-                    <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded-pill">
+                    <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded-pill mb-3">
                         <span class="ms-3 small fw-bold">@Localizer["Appearance"]</span>
                         <button id="themeToggleMobile" class="btn theme-toggle-btn rounded-circle" style="width: 35px; height: 35px;">
                             <i class="fas fa-moon"></i>
                         </button>
+                    </div>
+
+                    <div class="language-selector p-1 bg-light border rounded-pill d-flex">
+                        <form asp-controller="Culture" asp-action="SetLanguage" method="post" class="w-100 d-flex m-0">
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                            <button type="submit" name="culture" value="ar-KW" class="btn @(isRTL ? "btn-primary" : "btn-link text-dark text-decoration-none") flex-grow-1 btn-sm rounded-pill fw-bold">عربي</button>
+                            <button type="submit" name="culture" value="en-US" class="btn @(!isRTL ? "btn-primary" : "btn-link text-dark text-decoration-none") flex-grow-1 btn-sm rounded-pill fw-bold">EN</button>
+                        </form>
                     </div>
                 </div>
             </div>
