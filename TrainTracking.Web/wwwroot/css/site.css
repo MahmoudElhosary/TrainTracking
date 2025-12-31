@@ -375,57 +375,19 @@ body {
 .static-logo-container {
   display: flex;
   align-items: center;
-  transition: all 0.3s ease;
 }
 
 .static-logo {
   height: 50px;
   width: auto;
   object-fit: contain;
-  /* Removes white square background if drawing is dark on white */
-  mix-blend-mode: multiply;
-  filter: contrast(1.1) brightness(1.05);
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.static-logo-container:hover .static-logo {
-  transform: scale(1.1) rotate(-5deg);
-}
+/* Removed hover effects for static logo */
 
-[data-theme="dark"] .static-logo {
-  /* Invert colors for dark mode if drawing is dark */
-  filter: invert(1) brightness(2) contrast(1.2);
-  mix-blend-mode: screen;
-  /* Blends white parts with dark bg */
-}
+/* Removed theme-specific adjustments for static logo */
 
-@keyframes logoSlide {
-  0% {
-    transform: translateX(-20px);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes shake {
-
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  25% {
-    transform: translateX(-2px);
-  }
-
-  75% {
-    transform: translateX(2px);
-  }
-}
+/* Unused logo animations removed */
 
 
 /* Standalone Points Pill */
