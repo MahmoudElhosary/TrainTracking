@@ -253,13 +253,17 @@ namespace TrainTracking.Web.Controllers
         }
 
         [Authorize]
+        [HttpGet("Bookings/DownloadTicket/{id}")]
         public async Task<IActionResult> DownloadTicket(Guid id)
         {
             var booking = await _bookingRepository.GetByIdAsync(id);
             if (booking == null) return NotFound();
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (booking.UserId != userId && !User.IsInRole("Admin"))
+            bool isOwner = booking.UserId == userId || booking.UserId == "Anonymous";
+            bool isAdmin = User.IsInRole("Admin");
+
+            if (!isOwner && !isAdmin)
             {
                 return Forbid();
             }

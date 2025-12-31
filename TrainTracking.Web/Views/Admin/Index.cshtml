@@ -5,7 +5,7 @@
 
 <div class="container py-4">
     <!-- Header Area -->
-    <div class="d-flex justify-content-between align-items-center mb-5 admin-header p-4 rounded-4 shadow-sm bg-white border-start border-primary border-5">
+    <div class="d-flex justify-content-between align-items-center mb-5 admin-header p-4 rounded-4 shadow-sm bg-white-adaptive border-start border-primary border-5">
         <div>
             <h2 class="fw-bold mb-1 text-primary">لوحة تحكم KuwGo</h2>
             <p class="text-muted mb-0"><i class="fas fa-chart-line me-1"></i> متابعة أداء النظام والعمليات الحالية</p>
@@ -32,11 +32,11 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card p-4 rounded-4 shadow-sm border-0 h-100 bg-white border-bottom border-warning border-4">
+            <div class="stat-card p-4 rounded-4 shadow-sm border-0 h-100 bg-white-adaptive border-bottom border-warning border-4">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="small text-muted mb-1 fw-bold">إجمالي الحجوزات</div>
-                        <h3 class="fw-bold mb-0 text-dark">@ViewBag.TotalBookings</h3>
+                        <h3 class="fw-bold mb-0">@ViewBag.TotalBookings</h3>
                     </div>
                     <div class="stat-icon-sm text-warning bg-soft-warning"><i class="fas fa-ticket-alt"></i></div>
                 </div>
@@ -50,7 +50,7 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="small text-muted mb-1 fw-bold">الرحلات القادمة</div>
-                        <h3 class="fw-bold mb-0 text-dark">@ViewBag.ActiveTrips</h3>
+                        <h3 class="fw-bold mb-0">@ViewBag.ActiveTrips</h3>
                     </div>
                     <div class="stat-icon-sm text-success bg-soft-success"><i class="fas fa-train"></i></div>
                 </div>
@@ -62,7 +62,7 @@
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="small text-muted mb-1 fw-bold">المستخدمين</div>
-                        <h3 class="fw-bold mb-0 text-dark">@ViewBag.TotalUsers</h3>
+                        <h3 class="fw-bold mb-0">@ViewBag.TotalUsers</h3>
                     </div>
                     <div class="stat-icon-sm text-info bg-soft-info"><i class="fas fa-users"></i></div>
                 </div>
@@ -76,7 +76,7 @@
         <!-- Analytics Chart -->
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-                <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
+                <div class="card-header bg-white-adaptive p-4 border-0 d-flex justify-content-between align-items-center">
                     <h5 class="fw-bold mb-0"><i class="fas fa-chart-area text-primary me-2"></i>تحليل نشاط الحجز</h5>
                     <div class="dropdown">
                         <button class="btn btn-light btn-sm rounded-pill px-3" type="button">آخر 7 أيام</button>
@@ -93,7 +93,7 @@
         <!-- Action Center -->
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-                <div class="card-header bg-white p-4 border-0">
+                <div class="card-header bg-white-adaptive p-4 border-0">
                     <h5 class="fw-bold mb-0"><i class="fas fa-th-large text-primary me-2"></i>إدارة النظام</h5>
                 </div>
                 <div class="card-body p-4 pt-2">
@@ -141,7 +141,7 @@
 
     <!-- Recent Data -->
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden border-top border-primary border-4">
-        <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
+        <div class="card-header bg-white-adaptive p-4 border-0 d-flex justify-content-between align-items-center">
             <h5 class="fw-bold mb-0">آخر العمليات المكتملة</h5>
             <a href="#" class="btn btn-soft-primary btn-sm rounded-pill px-3">عرض الكل</a>
         </div>
@@ -230,12 +230,14 @@
 
     /* Action Buttons Modern */
     .admin-action-btn { 
-        background-color: #fff; 
+        background-color: var(--card-bg); 
+        color: var(--text-color);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
         border-radius: 1.25rem !important;
+        border: 1px solid var(--border-color) !important;
     }
     .admin-action-btn:hover { 
-        background-color: #fff; 
+        background-color: var(--input-bg); 
         transform: scale(1.02) translateX(-5px); 
         box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
     }
@@ -276,18 +278,7 @@
         color: #555;
     }
 
-    /* Dark Mode Support */
-    [data-theme="dark"] .card, 
-    [data-theme="dark"] .admin-header,
-    [data-theme="dark"] .stat-card:not(.bg-gradient-primary) { 
-        background-color: #1a1a1a !important; 
-        border: 1px solid #333 !important; 
-    }
-    [data-theme="dark"] .admin-action-btn { background-color: #222 !important; border-color: #333 !important; }
-    [data-theme="dark"] .admin-action-btn:hover { background-color: #2a2a2a !important; border-color: #0d6efd !important; }
-    [data-theme="dark"] .table thead th { background-color: #222 !important; color: #aaa !important; }
-    [data-theme="dark"] .text-dark { color: #fff !important; }
-    [data-theme="dark"] .avatar-circle { background: #333; color: #ddd; }
+    /* Redundant inline dark mode moved to site.css */
 </style>
 
 @section Scripts {
