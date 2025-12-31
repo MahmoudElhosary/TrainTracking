@@ -26,28 +26,26 @@ namespace TrainTracking.Web.Controllers
             if (result.Succeeded)
             {
                 var user = await _userManager.FindByEmailAsync(email);
-                if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
+                if (user != null && email.ToLower() == "admin@train.com")
                 {
-                    Console.WriteLine($"[KuwGo] Admin Login SUCCESS: {email}. Redirecting to Admin Dashboard.");
+                    // Sticky Admin: Double check roles on the fly to bypass potential seeding race conditions
+                    if (!await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        Console.WriteLine($"[KuwGo] ADMIN DETECTED WITHOUT ROLE. Fixing on the fly...");
+                        await _userManager.AddToRoleAsync(user, "Admin");
+                        // Re-sign in to ensure the user has the "Admin" claim in their cookie
+                        await _signInManager.SignInAsync(user, isPersistent: rememberMe);
+                    }
+                    
+                    Console.WriteLine($"[KuwGo] Admin Login SUCCESS: {email}. Redirecting to Dashboard.");
                     return RedirectToAction("Index", "Admin");
                 }
                 
-                Console.WriteLine($"[KuwGo] User Login SUCCESS: {email}. Redirecting to Home.");
                 return RedirectToAction("Index", "Home");
             }
 
             // Diagnostic Logging
-            var existingUser = await _userManager.FindByEmailAsync(email);
-            if (existingUser == null)
-            {
-                Console.WriteLine($"[KuwGo] Login FAILED: User '{email}' not found.");
-            }
-            else 
-            {
-                var roles = await _userManager.GetRolesAsync(existingUser);
-                Console.WriteLine($"[KuwGo] Login FAILED: User '{email}' exists with roles [{string.Join(", ", roles)}]. Password mismatch or account lock.");
-            }
-            
+            Console.WriteLine($"[KuwGo] Login FAILED for user: {email}. Result: {result}");
             ModelState.AddModelError(string.Empty, "محاولة تسجيل دخول غير ناجحة. تأكد من البريد الإلكتروني وكلمة المرور.");
             return View();
         }

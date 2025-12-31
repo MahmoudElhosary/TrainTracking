@@ -54,7 +54,7 @@ try
     });
 
     // Configure SQLite (Standard Context - Pooling can cause issues with Migrations/SQLite)
-    var dbPath = Environment.GetEnvironmentVariable("DATABASE_PATH") ?? "kuwgo_v2.db";
+    var dbPath = Environment.GetEnvironmentVariable("DATABASE_PATH") ?? "kuwgo_final.db";
     builder.Services.AddDbContext<TrainTrackingDbContext>(options =>
         options.UseSqlite($"Data Source={dbPath}"));
 
