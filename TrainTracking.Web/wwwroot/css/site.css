@@ -371,23 +371,48 @@ body {
   background: rgba(255, 193, 7, 0.25);
 }
 
-/* Static Image-Based Logo Styles */
-.static-logo-container {
+/* ================= PREMIUM BRANDING (KuwGo) ================= */
+.brand-logo-go {
+  font-family: 'Outfit', 'Cairo', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -1.5px;
   display: flex;
   align-items: center;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.static-logo {
-  height: 50px;
-  width: auto;
-  object-fit: contain;
+.brand-logo-go:hover {
+  transform: scale(1.05) rotate(-1deg);
 }
 
-/* Removed hover effects for static logo */
+.logo-k {
+  color: var(--accent-color);
+  text-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+}
 
-/* Removed theme-specific adjustments for static logo */
+.logo-uw {
+  color: var(--text-color);
+}
 
-/* Unused logo animations removed */
+.logo-go {
+  background: linear-gradient(135deg, #4f46e5 0%, var(--accent-color) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(79, 70, 229, 0.2));
+}
+
+.scale-75 {
+  transform: scale(0.75);
+  transform-origin: left center;
+}
+
+[dir="rtl"] .scale-75 {
+  transform-origin: right center;
+}
 
 
 /* Standalone Points Pill */
