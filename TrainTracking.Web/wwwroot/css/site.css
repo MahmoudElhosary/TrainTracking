@@ -228,6 +228,58 @@ body {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+.user-avatar-lg {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, var(--accent-color), #4f46e5);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Sidebar Specific Styles */
+.sidebar-offcanvas {
+  width: 300px !important;
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+.sidebar-icon-box {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.03);
+  font-size: 0.9rem;
+}
+
+[data-theme="dark"] .sidebar-icon-box {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-offcanvas .list-group-item {
+  background-color: transparent !important;
+  color: var(--text-color) !important;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.sidebar-offcanvas .list-group-item:hover {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+  padding-right: 2rem !important;
+  /* Slight animation on hover for RTL */
+}
+
+[data-theme="dark"] .sidebar-offcanvas .list-group-item:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+
 .btn-icon-only {
   width: 32px;
   height: 32px;
