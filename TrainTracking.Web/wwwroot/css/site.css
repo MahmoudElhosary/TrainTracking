@@ -371,28 +371,51 @@ body {
   background: rgba(255, 193, 7, 0.25);
 }
 
-/* Logo Animations */
-.logo-img {
-  height: 50px;
-  width: auto;
-  mix-blend-mode: multiply;
-  filter: contrast(1.2) brightness(1.1);
-  animation: trainSlide 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
-  transform-origin: left center;
+/* CSS Stylized Logo */
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  font-family: 'Cairo', sans-serif;
+  cursor: pointer;
+  user-select: none;
+  animation: logoSlide 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
 
-.logo-img:hover {
-  animation: shake 0.5s ease-in-out infinite;
+.logo-icon {
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, #005eb8, #38bdf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(0, 94, 184, 0.2));
 }
 
-@keyframes trainSlide {
+.logo-text {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #2d3748;
+  letter-spacing: -1px;
+}
+
+[data-theme="dark"] .logo-text {
+  color: #ffffff;
+}
+
+.text-primary-go {
+  color: #005eb8;
+}
+
+[data-theme="dark"] .text-primary-go {
+  color: #38bdf8;
+}
+
+@keyframes logoSlide {
   0% {
-    transform: translateX(-100px) skewX(-20deg);
+    transform: translateX(-20px);
     opacity: 0;
   }
 
   100% {
-    transform: translateX(0) skewX(0);
+    transform: translateX(0);
     opacity: 1;
   }
 }
