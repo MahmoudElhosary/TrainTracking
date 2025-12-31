@@ -252,7 +252,6 @@ namespace TrainTracking.Web.Controllers
             return View();
         }
 
-        [Authorize]
         [HttpGet("Bookings/DownloadTicket/{id}")]
         public async Task<IActionResult> DownloadTicket(Guid id)
         {
@@ -260,10 +259,17 @@ namespace TrainTracking.Web.Controllers
             if (booking == null) return NotFound();
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            bool isOwner = booking.UserId == userId || booking.UserId == "Anonymous";
-            bool isAdmin = User.IsInRole("Admin");
+            bool isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+            
+            // Allow if:
+            // 1. User is Admin
+            // 2. User is the Owner (Logged in)
+            // 3. Booking is Anonymous (Anyone with the link/GUID can download - acceptable trade-off for anonymous UX)
+            bool isOwner = (isAuthenticated && booking.UserId == userId);
+            bool isAnonymousBooking = booking.UserId == "Anonymous";
+            bool isAdmin = isAuthenticated && User.IsInRole("Admin");
 
-            if (!isOwner && !isAdmin)
+            if (!isOwner && !isAnonymousBooking && !isAdmin)
             {
                 return Forbid();
             }
