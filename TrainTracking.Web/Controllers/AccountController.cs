@@ -25,8 +25,11 @@ namespace TrainTracking.Web.Controllers
             var result = await _signInManager.PasswordSignInAsync(email, password, rememberMe, lockoutOnFailure: false);
             if (result.Succeeded)
             {
+                Console.WriteLine($"[KuwGo] Login SUCCESS for user: {email}");
                 return RedirectToAction("Index", "Home");
             }
+            
+            Console.WriteLine($"[KuwGo] Login FAILED for user: {email}. Result: {result}");
             ModelState.AddModelError(string.Empty, "محاولة تسجيل دخول غير ناجحة.");
             return View();
         }

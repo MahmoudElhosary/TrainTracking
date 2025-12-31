@@ -107,36 +107,38 @@ public static class DbInitializer
             }
         }
 
-        // Seed Admin User
-        var adminEmail = "Admin@train.com";
-        var adminUser = await userManager.FindByEmailAsync(adminEmail);
-        if (adminUser == null)
+        // Seed Admin User (HARD RESET logic)
+        var adminEmail = "admin@train.com";
+        Console.WriteLine($"[KuwGo] Checking for existing admin: {adminEmail}");
+        
+        var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+        if (existingAdmin != null)
         {
-            var user = new IdentityUser
-            {
-                UserName = adminEmail,
-                Email = adminEmail,
-                EmailConfirmed = true
-            };
-            var result = await userManager.CreateAsync(user, "Admin1234!");
-            if (result.Succeeded)
-            {
-                await userManager.AddToRoleAsync(user, "Admin");
-                Console.WriteLine("[KuwGo] Admin user created with Admin1234!");
-            }
+            Console.WriteLine("[KuwGo] Found existing admin. Deleting for Hard Reset...");
+            await userManager.DeleteAsync(existingAdmin);
+        }
+
+        Console.WriteLine("[KuwGo] Creating fresh admin account...");
+        var user = new IdentityUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true
+        };
+        
+        var result = await userManager.CreateAsync(user, "Admin1234!");
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(user, "Admin");
+            Console.WriteLine("=================================================");
+            Console.WriteLine("[KuwGo] ADMIN ACCOUNT HARD RESET SUCCESSFUL");
+            Console.WriteLine($"[KuwGo] Email: {adminEmail}");
+            Console.WriteLine("[KuwGo] Password: Admin1234!");
+            Console.WriteLine("=================================================");
         }
         else
         {
-            // Ensure Password is reset to match user's expectation
-            var resetToken = await userManager.GeneratePasswordResetTokenAsync(adminUser);
-            await userManager.ResetPasswordAsync(adminUser, resetToken, "Admin1234!");
-            
-            // Ensure Role is still there
-            if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
-            {
-                await userManager.AddToRoleAsync(adminUser, "Admin");
-            }
-            Console.WriteLine("[KuwGo] Admin user password reset to Admin1234!");
+            Console.WriteLine($"[KuwGo] CRITICAL FAILED to create admin: {string.Join(", ", result.Errors.Select(e => e.Description))}");
         }
     }
 }
