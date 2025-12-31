@@ -1,6 +1,7 @@
-@model IEnumerable<TrainTracking.Domain.Entities.Trip>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 @{
-    ViewData["Title"] = "التتبع الحي للقطارات";
+    ViewData["Title"] = Localizer["LiveTrackingTitle"];
 }
 
 @if (ViewBag.DebugInfo != null)
@@ -130,18 +131,18 @@
 <div id="liveMapContent" dir="rtl">
     <div class="live-sidebar">
         <div class="sidebar-header">
-            <h5 class="fw-bold mb-1"><i class="fas fa-satellite-dish text-primary me-2"></i> رحلات مباشرة</h5>
-            <p class="text-muted mb-0 small" id="activeTrainCount">جاري جلب البيانات...</p>
+            <h5 class="fw-bold mb-1"><i class="fas fa-satellite-dish text-primary me-2"></i> @Localizer["LiveTrips"]</h5>
+            <p class="text-muted mb-0 small" id="activeTrainCount">@Localizer["FetchingData"]</p>
         </div>
         <div class="train-list" id="sidebarTrainList">
             <!-- Dynamic Content -->
         </div>
         <div class="p-3 border-top bg-light">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="small text-muted">حالة النظام</span>
-                <span class="badge bg-success rounded-pill px-2" id="connectionStatus">متصل</span>
+                <span class="small text-muted">@Localizer["SystemStatus"]</span>
+                <span class="badge bg-success rounded-pill px-2" id="connectionStatus">@Localizer["Connected"]</span>
             </div>
-            <p class="mb-0 x-small text-muted" style="font-size: 0.7rem;">يتم تحديث الموقع كل ثانيتين للحفاظ على دقة التتبع.</p>
+            <p class="mb-0 x-small text-muted" style="font-size: 0.7rem;">@Localizer["UpdateFrequency"]</p>
         </div>
     </div>
     <div id="mainLiveMap"></div>
@@ -228,7 +229,7 @@
 
                         if (!markers[trip.id]) {
                             markers[trip.id] = L.marker([lat, lng], { icon: trainIcon }).addTo(map)
-                                .bindPopup(`<b>قطار ${trip.trainNumber}</b><br>من: ${trip.from.name}<br>إلى: ${trip.to.name}`);
+                                .bindPopup(`<b>@Localizer["Train"] ${trip.trainNumber}</b><br>@Localizer["From"]: ${trip.from.name}<br>@Localizer["To"]: ${trip.to.name}`);
                             
                             polylines[trip.id] = L.polyline([[trip.from.lat, trip.from.lng], [trip.to.lat, trip.to.lng]], {
                                 color: '#3498db',
@@ -243,24 +244,24 @@
                         var statusText = "";
                         if (progress < 0) {
                             if (minutesUntilDeparture >= 1440) {
-                                statusText = `${Math.floor(minutesUntilDeparture / 1440)} يوم`;
+                                statusText = `${Math.floor(minutesUntilDeparture / 1440)} @Localizer["Day"]`;
                             } else if (minutesUntilDeparture >= 60) {
-                                statusText = `${Math.floor(minutesUntilDeparture / 60)} ساعة`;
+                                statusText = `${Math.floor(minutesUntilDeparture / 60)} @Localizer["Hour"]`;
                             } else {
-                                statusText = `${minutesUntilDeparture} دقيقة`;
+                                statusText = `${minutesUntilDeparture} @Localizer["Minute"]`;
                             }
                         }
 
                         var statusBadge = progress < 0 
-                            ? `<span class="badge bg-warning bg-opacity-10 text-warning small">ينطلق بعد ${statusText}</span>`
-                            : `<span class="badge bg-success bg-opacity-10 text-success small">مباشر</span>`;
+                            ? `<span class="badge bg-warning bg-opacity-10 text-warning small">@Localizer["DepartsIn"] ${statusText}</span>`
+                            : `<span class="badge bg-success bg-opacity-10 text-success small">@Localizer["Live"]</span>`;
                         
                         var progressPercent = progress < 0 ? 0 : (progress > 1 ? 100 : progress * 100);
                         
                         sidebarHtml += `
                             <div class="live-train-card" onclick="focusTrain('${trip.id}')">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-bold"><i class="fas fa-train text-primary me-1"></i> قطار ${trip.trainNumber || '---'}</span>
+                                    <span class="fw-bold"><i class="fas fa-train text-primary me-1"></i> @Localizer["Train"] ${trip.trainNumber || '---'}</span>
                                     ${statusBadge}
                                 </div>
                                 <div class="row g-0 align-items-center">
@@ -291,14 +292,14 @@
 
             var sidebarElement = document.getElementById('sidebarTrainList');
             if (sidebarElement) {
-                sidebarElement.innerHTML = sidebarHtml || '<p class="text-center text-muted py-5">لا يوجد رحلات نشطة حالياً</p>';
+                sidebarElement.innerHTML = sidebarHtml || '<p class="text-center text-muted py-5">@Localizer["NoActiveTrips"]</p>';
             } else {
                 console.error("❌ Sidebar element not found!");
             }
             
             var countElement = document.getElementById('activeTrainCount');
             if (countElement) {
-                countElement.innerText = `${activeCount} قطارات نشطة حالياً`;
+                countElement.innerText = `${activeCount} @Localizer["ActiveTrainsNow"]`;
             }
         }
 
@@ -325,9 +326,9 @@
         });
 
         connection.start().then(() => {
-            document.getElementById('connectionStatus').innerText = "متصل مباشرة";
+            document.getElementById('connectionStatus').innerText = "@Localizer["LiveConnected"]";
         }).catch(err => {
-            document.getElementById('connectionStatus').innerText = "خطأ في الاتصال";
+            document.getElementById('connectionStatus').innerText = "@Localizer["ConnectionError"]";
             document.getElementById('connectionStatus').className = "badge bg-danger rounded-pill px-2";
         });
 

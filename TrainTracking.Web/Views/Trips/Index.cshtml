@@ -1,6 +1,7 @@
-@model List<TrainTracking.Application.DTOs.TripDto>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 @{
-    ViewData["Title"] = "الرحلات القادمة";
+    ViewData["Title"] = Localizer["UpcomingTrips"];
 }
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -13,13 +14,13 @@
         <div class="col-lg-12">
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
                 <div class="card-header bg-primary text-white p-4 d-flex align-items-center justify-content-between gradient-header">
-                    <h2 class="mb-0 fw-bold fs-4"><i class="fas fa-train me-2"></i> الرحلات القادمة</h2>
+                    <h2 class="mb-0 fw-bold fs-4"><i class="fas fa-train me-2"></i> @Localizer["UpcomingTrips"]</h2>
                     <div>
                         <a href="#" class="btn btn-light btn-sm rounded-pill fw-bold text-primary shadow-sm hover-scale me-2" data-bs-toggle="modal" data-bs-target="#mapModal">
-                            <i class="fas fa-map-marked-alt me-1"></i> عرض الخريطة
+                            <i class="fas fa-map-marked-alt me-1"></i> @Localizer["ViewMap"]
                         </a>
                         <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-2 fs-6 backdrop-blur">
-                            <i class="far fa-calendar-alt me-1"></i> @DateTime.Now.ToString("dd MMMM yyyy")
+                            <i class="far fa-calendar-alt me-1"></i> @DateTime.Now.ToString("D")
                         </span>
                     </div>
                 </div>
@@ -28,9 +29,9 @@
                     <div class="bg-light border-bottom p-4">
                         <form asp-action="Index" method="get" class="row g-3 align-items-end">
                             <div class="col-md-3">
-                                <label class="form-label small fw-bold text-muted">من محطة</label>
+                                <label class="form-label small fw-bold text-muted">@Localizer["FromStation"]</label>
                                 <select name="fromStationId" class="form-select rounded-pill border-0 shadow-sm">
-                                    <option value="">كل المحطات</option>
+                                    <option value="">@Localizer["AllStations"]</option>
                                     @foreach (var station in (ViewBag.Stations as IEnumerable<TrainTracking.Domain.Entities.Station>) ?? Enumerable.Empty<TrainTracking.Domain.Entities.Station>())
                                     {
                                         <option value="@station.Id" selected="@(ViewBag.FromStationId?.ToString() == station.Id.ToString() ? "selected" : null)">@station.Name</option>
@@ -38,9 +39,9 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label small fw-bold text-muted">إلى محطة</label>
+                                <label class="form-label small fw-bold text-muted">@Localizer["ToStation"]</label>
                                 <select name="toStationId" class="form-select rounded-pill border-0 shadow-sm">
-                                    <option value="">كل المحطات</option>
+                                    <option value="">@Localizer["AllStations"]</option>
                                     @foreach (var station in (ViewBag.Stations as IEnumerable<TrainTracking.Domain.Entities.Station>) ?? Enumerable.Empty<TrainTracking.Domain.Entities.Station>())
                                     {
                                         <option value="@station.Id" selected="@(ViewBag.ToStationId?.ToString() == station.Id.ToString() ? "selected" : null)">@station.Name</option>
@@ -48,12 +49,12 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label small fw-bold text-muted">التاريخ</label>
+                                <label class="form-label small fw-bold text-muted">@Localizer["Date"]</label>
                                 <input type="date" name="date" value="@ViewBag.Date" class="form-control rounded-pill border-0 shadow-sm" />
                             </div>
                             <div class="col-md-3">
                                 <button type="submit" class="btn btn-primary rounded-pill w-100 fw-bold shadow-sm">
-                                    <i class="fas fa-search me-2"></i> بحث التوفر
+                                    <i class="fas fa-search me-2"></i> @Localizer["SearchAvailability"]
                                 </button>
                             </div>
                         </form>
@@ -64,12 +65,12 @@
                         <table class="table table-hover align-middle mb-0 custom-table">
                             <thead class="bg-light border-bottom">
                                 <tr class="text-secondary fs-7">
-                                    <th class="py-3 px-4">القطار</th>
-                                    <th class="py-3 px-4">المسار</th>
-                                    <th class="py-3 px-4">الموعد</th>
-                                    <th class="py-3 px-4 text-center">الحالة</th>
-                                    <th class="py-3 px-4 text-center">التأخير</th>
-                                    <th class="py-3 px-4 text-center">إجراءات</th> 
+                                    <th class="py-3 px-4">@Localizer["Train"]</th>
+                                    <th class="py-3 px-4">@Localizer["Route"]</th>
+                                    <th class="py-3 px-4">@Localizer["Schedule"]</th>
+                                    <th class="py-3 px-4 text-center">@Localizer["Status"]</th>
+                                    <th class="py-3 px-4 text-center">@Localizer["Delay"]</th>
+                                    <th class="py-3 px-4 text-center">@Localizer["Actions"]</th> 
                                 </tr>
                             </thead>
                             <tbody>
@@ -84,9 +85,9 @@
                                     };
                                     var statusText = trip.Status switch
                                     {
-                                        TrainTracking.Domain.Entities.TripStatus.OnTime => "في الموعد",
-                                        TrainTracking.Domain.Entities.TripStatus.Delayed => "متأخر",
-                                        TrainTracking.Domain.Entities.TripStatus.Scheduled => "مجدول",
+                                        TrainTracking.Domain.Entities.TripStatus.OnTime => Localizer["OnTime"].Value,
+                                        TrainTracking.Domain.Entities.TripStatus.Delayed => Localizer["Delayed"].Value,
+                                        TrainTracking.Domain.Entities.TripStatus.Scheduled => Localizer["Scheduled"].Value,
                                         _ => trip.Status.ToString()
                                     };
                                     <tr class="border-bottom" id="trip-@trip.Id">
@@ -133,25 +134,25 @@
                                             @if (trip.DelayMinutes > 0)
                                             {
                                                 <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1 rounded-2">
-                                                    <i class="fas fa-exclamation-triangle me-1"></i> +@trip.DelayMinutes دقيقة
+                                                    <i class="fas fa-exclamation-triangle me-1"></i> +@trip.DelayMinutes @Localizer["Minutes"]
                                                 </span>
                                             }
                                             else
                                             {
-                                                <span class="text-success small"><i class="fas fa-check-circle"></i> لا يوجد</span>
+                                                <span class="text-success small"><i class="fas fa-check-circle"></i> @Localizer["None"]</span>
                                             }
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             @if (trip.Status == TrainTracking.Domain.Entities.TripStatus.Cancelled || trip.Status == TrainTracking.Domain.Entities.TripStatus.Completed)
                                             {
                                                 <button class="btn btn-secondary btn-sm rounded-pill px-4 shadow-sm fw-bold opacity-50" disabled style="cursor: not-allowed;">
-                                                    <i class="fas fa-ban me-1"></i> غير متاح
+                                                    <i class="fas fa-ban me-1"></i> @Localizer["NotAvailable"]
                                                 </button>
                                             }
                                             else
                                             {
                                                 <a asp-controller="Bookings" asp-action="Create" asp-route-id="@trip.Id" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm fw-bold">
-                                                    <i class="fas fa-ticket-alt me-1"></i> احجز الآن
+                                                    <i class="fas fa-ticket-alt me-1"></i> @Localizer["BookNow"]
                                                 </a>
                                             }
                                         </td>
@@ -174,9 +175,9 @@
                             };
                             var statusText = trip.Status switch
                             {
-                                TrainTracking.Domain.Entities.TripStatus.OnTime => "في الموعد",
-                                TrainTracking.Domain.Entities.TripStatus.Delayed => "متأخر",
-                                TrainTracking.Domain.Entities.TripStatus.Scheduled => "مجدول",
+                                TrainTracking.Domain.Entities.TripStatus.OnTime => Localizer["OnTime"].Value,
+                                TrainTracking.Domain.Entities.TripStatus.Delayed => Localizer["Delayed"].Value,
+                                TrainTracking.Domain.Entities.TripStatus.Scheduled => Localizer["Scheduled"].Value,
                                 _ => trip.Status.ToString()
                             };
                             
@@ -211,7 +212,7 @@
                                     {
                                         <div class="alert alert-danger py-2 px-3 mb-3 d-flex align-items-center small bg-opacity-10 border-0 text-danger rounded-3">
                                             <i class="fas fa-exclamation-triangle me-2"></i>
-                                            <strong>تأخير:</strong>&nbsp;@trip.DelayMinutes دقيقة
+                                            <strong>@Localizer["Delay"]:</strong>&nbsp;@trip.DelayMinutes @Localizer["Minutes"]
                                         </div>
                                     }
 
@@ -219,13 +220,13 @@
                                         @if (trip.Status == TrainTracking.Domain.Entities.TripStatus.Cancelled || trip.Status == TrainTracking.Domain.Entities.TripStatus.Completed)
                                         {
                                             <button class="btn btn-secondary rounded-pill fw-bold opacity-50" disabled>
-                                                <i class="fas fa-ban me-1"></i> غير متاح
+                                                <i class="fas fa-ban me-1"></i> @Localizer["NotAvailable"]
                                             </button>
                                         }
                                         else
                                         {
                                             <a asp-controller="Bookings" asp-action="Create" asp-route-id="@trip.Id" class="btn btn-primary rounded-pill fw-bold shadow-sm">
-                                                <i class="fas fa-ticket-alt me-1"></i> احجز الآن
+                                                <i class="fas fa-ticket-alt me-1"></i> @Localizer["BookNow"]
                                             </a>
                                         }
                                     </div>
@@ -235,8 +236,8 @@
                     </div>
                 </div>
                 <div class="card-footer bg-light p-3 text-center text-muted small border-top-0 d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-sync-alt me-1"></i> يتم التحديث تلقائياً</span>
-                    <span>آخر تحديث: <span id="last-updated">@DateTime.Now.ToString("HH:mm:ss")</span></span>
+                    <span><i class="fas fa-sync-alt me-1"></i> @Localizer["AutoUpdating"]</span>
+                    <span>@Localizer["LastUpdate"]: <span id="last-updated">@DateTime.Now.ToString("T")</span></span>
                 </div>
             </div>
         </div>
@@ -248,14 +249,14 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">
             <div class="modal-header bg-primary text-white p-4">
-                <h5 class="modal-title fw-bold" id="mapModalLabel"><i class="fas fa-map-marked-alt me-2"></i> خريطة محطات القطار</h5>
+                <h5 class="modal-title fw-bold" id="mapModalLabel"><i class="fas fa-map-marked-alt me-2"></i> @Localizer["TrainStationMap"]</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0">
                 <div id="map"></div>
             </div>
             <div class="modal-footer bg-light p-3">
-                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">@Localizer["Close"]</button>
             </div>
         </div>
     </div>
@@ -285,10 +286,10 @@
                     if (trip.delayMinutes && trip.delayMinutes > 0) {
                         delayCell.innerHTML = `
                             <span class="badge bg-danger bg-opacity-10 text-danger px-2 py-1 rounded-2">
-                                <i class="fas fa-exclamation-triangle me-1"></i> +${trip.delayMinutes} دقيقة
+                                <i class="fas fa-exclamation-triangle me-1"></i> +${trip.delayMinutes} @Localizer["Minutes"]
                             </span>`;
                     } else {
-                        delayCell.innerHTML = `<span class="text-success small"><i class="fas fa-check-circle"></i> لا يوجد</span>`;
+                        delayCell.innerHTML = `<span class="text-success small"><i class="fas fa-check-circle"></i> @Localizer["None"]</span>`;
                     }
                 }
 
@@ -358,7 +359,7 @@
                         if (!markers[trip.id]) {
                             markers[trip.id] = L.marker([currentLat, currentLng], { icon: trainIcon })
                                 .addTo(map)
-                                .bindPopup(`<b>قطار ${trip.trainNumber}</b><br>متجه إلى: ${trip.to.name}`);
+                                .bindPopup(`<b>@Localizer["Train"] ${trip.trainNumber}</b><br>@Localizer["HeadingTo"]: ${trip.to.name}`);
                             
                             // Draw path
                             var path = L.polyline([[trip.from.lat, trip.from.lng], [trip.to.lat, trip.to.lng]], {
@@ -392,7 +393,7 @@
             for (var name in stations) {
                 L.circleMarker(stations[name], { radius: 5, color: '#f39c12', fillOpacity: 0.8 })
                     .addTo(map)
-                    .bindPopup(`<b>محطة ${name}</b>`);
+                    .bindPopup(`<b>@Localizer["Station"] ${name}</b>`);
             }
 
             map.invalidateSize();

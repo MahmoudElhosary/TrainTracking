@@ -52,7 +52,6 @@
             transform: translateY(-2px);
         }
         .footer { background-color: white; padding: 1.5rem 0; margin-top: 3rem; }
-        .footer { background-color: white; padding: 1.5rem 0; margin-top: 3rem; }
     </style>
 </head>
 <body>
@@ -83,12 +82,12 @@
                 <!-- Desktop Desktop Navigation -->
                 <div class="collapse navbar-collapse d-none d-lg-flex justify-content-between">
                     <ul class="navbar-nav @(isRTL ? "flex-grow-1" : "flex-grow-1 ms-4")">
-                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">@(isRTL ? "الرئيسية" : "Home")</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Trips" asp-action="Index">@(isRTL ? "الرحلات" : "Trips")</a></li>
-                        <li class="nav-item"><a class="nav-link text-success fw-bold" asp-controller="Trips" asp-action="Live"><i class="fas fa-satellite-dish me-1"></i> @(isRTL ? "التتبع الحي" : "Live Tracking")</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">@Localizer["Home"]</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Trips" asp-action="Index">@Localizer["Trips"]</a></li>
+                        <li class="nav-item"><a class="nav-link text-success fw-bold" asp-controller="Trips" asp-action="Live"><i class="fas fa-satellite-dish me-1"></i> @Localizer["LiveTracking"]</a></li>
                         @if (User.IsInRole("Admin"))
                         {
-                            <li class="nav-item"><a class="nav-link text-primary fw-bold" asp-controller="Admin" asp-action="Index"><i class="fas fa-tools me-1"></i> @(isRTL ? "لوحة التحكم" : "Dashboard")</a></li>
+                            <li class="nav-item"><a class="nav-link text-primary fw-bold" asp-controller="Admin" asp-action="Index"><i class="fas fa-tools me-1"></i> @Localizer["Dashboard"]</a></li>
                         }
                     </ul>
                     <ul class="navbar-nav align-items-center">
@@ -97,8 +96,8 @@
                             <form asp-controller="Culture" asp-action="SetLanguage" method="post" class="m-0">
                                 <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
                                 <div class="btn-group btn-group-sm rounded-pill overflow-hidden shadow-sm border">
-                                    <button type="submit" name="culture" value="ar-KW" class="btn @(isRTL ? "btn-primary" : "btn-white") border-0 px-3 fw-bold">AR</button>
-                                    <button type="submit" name="culture" value="en-US" class="btn @(!isRTL ? "btn-primary" : "btn-white") border-0 px-3 fw-bold">EN</button>
+                                    <button type="submit" name="culture" value="ar-KW" class="btn @(isRTL ? "btn-primary" : "btn-white text-dark") border-0 px-3 fw-bold">AR</button>
+                                    <button type="submit" name="culture" value="en-US" class="btn @(!isRTL ? "btn-primary" : "btn-white text-dark") border-0 px-3 fw-bold">EN</button>
                                 </div>
                             </form>
                         </li>
@@ -106,12 +105,12 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link position-relative highlight-link pe-3" asp-controller="Bookings" asp-action="MyBookings">
-                                    <i class="fas fa-ticket-alt @(isRTL ? "me-1" : "ms-1")"></i> @(isRTL ? "حجوزاتي" : "My Bookings")
+                                    <i class="fas fa-ticket-alt @(isRTL ? "me-1" : "ms-1")"></i> @Localizer["MyBookings"]
                                 </a>
                             </li>
 
                             <li class="nav-item d-flex align-items-center @(isRTL ? "me-2" : "ms-2")">
-                                <a asp-controller="Bookings" asp-action="Rewards" class="points-standalone-btn shadow-sm rounded-circle d-flex align-items-center justify-content-center text-decoration-none" style="width: 42px; height: 42px;" title="@(isRTL ? "رصيد نقاطي" : "My Points"): @points">
+                                <a asp-controller="Bookings" asp-action="Rewards" class="points-standalone-btn shadow-sm rounded-circle d-flex align-items-center justify-content-center text-decoration-none" style="width: 42px; height: 42px;" title="@Localizer["MyPoints"]: @points">
                                     <div class="coin-glow m-0">
                                         <i class="fas fa-dollar-sign text-warning"></i>
                                     </div>
@@ -127,7 +126,7 @@
                                     </div>
                                     <div class="vr h-50 my-auto bg-secondary opacity-25 mx-0"></div>
                                     <form asp-controller="Account" asp-action="Logout" method="post" class="d-flex align-items-center m-0">
-                                        <button type="submit" onclick="sessionStorage.removeItem('locationChecked')" class="btn btn-sm btn-icon-only text-danger-soft rounded-circle" title="@(isRTL ? "تسجيل الخروج" : "Logout")">
+                                        <button type="submit" onclick="sessionStorage.removeItem('locationChecked')" class="btn btn-sm btn-icon-only text-danger-soft rounded-circle" title="@Localizer["Logout"]">
                                             <i class="fas fa-power-off"></i>
                                         </button>
                                     </form>
@@ -136,11 +135,11 @@
                         }
                         else
                         {
-                            <li class="nav-item"><a class="nav-link bg-primary text-white px-4 rounded-pill shadow-sm" asp-controller="Account" asp-action="Login">@(isRTL ? "دخول" : "Login")</a></li>
+                            <li class="nav-item"><a class="nav-link bg-primary text-white px-4 rounded-pill shadow-sm" asp-controller="Account" asp-action="Login">@Localizer["Login"]</a></li>
                         }
                         
                         <li class="nav-item @(isRTL ? "ms-2" : "me-2")">
-                           <button id="themeToggle" class="btn btn-link nav-link theme-toggle-btn" title="@(isRTL ? "تغيير المظهر" : "Toggle Theme")">
+                           <button id="themeToggle" class="btn btn-link nav-link theme-toggle-btn" title="@Localizer["ToggleTheme"]">
                                 <i class="fas fa-moon"></i>
                             </button>
                         </li>
@@ -170,19 +169,19 @@
                             </div>
                             <div>
                                 <h6 class="mb-0 fw-bold">@User.Identity?.Name</h6>
-                                <span class="text-muted small">@points @(isRTL ? "نقطة" : "Points")</span>
+                                <span class="text-muted small">@points @Localizer["Points"]</span>
                             </div>
                         </div>
                         <div class="row g-2">
                             <div class="col-6">
                                 <a asp-controller="Bookings" asp-action="Rewards" class="btn btn-outline-warning w-100 btn-sm rounded-pill">
-                                    <i class="fas fa-coins @(isRTL ? "me-1" : "ms-1")"></i> @(isRTL ? "النقاط" : "Points")
+                                    <i class="fas fa-coins @(isRTL ? "me-1" : "ms-1")"></i> @Localizer["Points"]
                                 </a>
                             </div>
                             <div class="col-6">
                                 <form asp-controller="Account" asp-action="Logout" method="post">
                                     <button type="submit" class="btn btn-outline-danger w-100 btn-sm rounded-pill">
-                                        <i class="fas fa-sign-out-alt @(isRTL ? "me-1" : "ms-1")"></i> @(isRTL ? "خروج" : "Logout")
+                                        <i class="fas fa-sign-out-alt @(isRTL ? "me-1" : "ms-1")"></i> @Localizer["Logout"]
                                     </button>
                                 </form>
                             </div>
@@ -193,7 +192,7 @@
                 {
                     <div class="p-4 border-bottom bg-light bg-opacity-10">
                         <a asp-controller="Account" asp-action="Login" class="btn btn-primary w-100 rounded-pill shadow-sm">
-                            <i class="fas fa-sign-in-alt @(isRTL ? "me-1" : "ms-1")"></i> @(isRTL ? "دخول للأعضاء" : "Member Login")
+                            <i class="fas fa-sign-in-alt @(isRTL ? "me-1" : "ms-1")"></i> @Localizer["MemberLogin"]
                         </a>
                     </div>
                 }
@@ -202,21 +201,21 @@
                 <div class="list-group list-group-flush py-2 text-@(isRTL ? "start" : "start")">
                     <a asp-controller="Home" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
                         <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-primary"><i class="fas fa-home"></i></div>
-                        @(isRTL ? "الرئيسية" : "Home")
+                        @Localizer["Home"]
                     </a>
                     <a asp-controller="Trips" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
                         <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-info"><i class="fas fa-train"></i></div>
-                        @(isRTL ? "الرحلات" : "Trips")
+                        @Localizer["Trips"]
                     </a>
                     <a asp-controller="Trips" asp-action="Live" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center text-success fw-bold">
                         <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-success"><i class="fas fa-map-marker-alt"></i></div>
-                        @(isRTL ? "التتبع الحي" : "Live Tracking")
+                        @Localizer["LiveTracking"]
                     </a>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         <a asp-controller="Bookings" asp-action="MyBookings" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
                             <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-warning"><i class="fas fa-ticket-alt"></i></div>
-                            @(isRTL ? "حجوزاتي" : "My Bookings")
+                            @Localizer["MyBookings"]
                         </a>
                     }
                     @if (User.IsInRole("Admin"))
@@ -224,7 +223,7 @@
                         <div class="dropdown-divider mx-4 my-2"></div>
                         <a asp-controller="Admin" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center text-primary fw-bold">
                             <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-primary"><i class="fas fa-tools"></i></div>
-                            @(isRTL ? "لوحة التحكم" : "Dashboard")
+                            @Localizer["Dashboard"]
                         </a>
                     }
                 </div>
@@ -232,7 +231,7 @@
                 <!-- Footer Section (Theme Toggle) -->
                 <div class="mt-auto p-4 border-top">
                     <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded-pill">
-                        <span class="ms-3 small fw-bold">@(isRTL ? "تغيير المظهر" : "Appearance")</span>
+                        <span class="ms-3 small fw-bold">@Localizer["Appearance"]</span>
                         <button id="themeToggleMobile" class="btn theme-toggle-btn rounded-circle" style="width: 35px; height: 35px;">
                             <i class="fas fa-moon"></i>
                         </button>
@@ -302,9 +301,9 @@
     </div>
     <footer class="footer text-muted border-top">
         <div class="container text-center">
-            &copy; 2025 - KuwGo - <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - KuwGo - <a asp-controller="Home" asp-action="Privacy">@Localizer["Privacy"]</a>
             <span class="mx-2 opacity-50">|</span>
-            <span class="small fw-semibold text-primary-go pt-1">Powered By <span class="badge border border-primary text-primary px-2 py-1 ms-1" style="font-size: 0.65rem;">MH</span></span>
+            <span class="small fw-semibold text-primary-go pt-1">@Localizer["PoweredBy"] <span class="badge border border-primary text-primary px-2 py-1 ms-1" style="font-size: 0.65rem;">MH</span></span>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -315,14 +314,14 @@
         <div id="stationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header bg-primary text-white">
                 <i class="fas fa-map-marker-alt me-2"></i>
-                <strong class="me-auto">أقرب محطة لك</strong>
+                <strong class="me-auto">@Localizer["NearestStation"]</strong>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
             <div class="toast-body bg-white">
-                <p class="mb-2">يبدو أنك قريب من <strong id="nearestStationName" class="text-primary"></strong> (<span id="stationDistance"></span> كم).</p>
+                <p class="mb-2">@Localizer["YouAreNear"] <strong id="nearestStationName" class="text-primary"></strong> (<span id="stationDistance"></span> @Localizer["Km"]).</p>
                 <div class="mt-2 pt-2 border-top">
                     <a id="bookFromStationBtn" class="btn btn-sm btn-success w-100 fw-bold">
-                        <i class="fas fa-ticket-alt me-1"></i> احجز من هنا
+                        <i class="fas fa-ticket-alt me-1"></i> @Localizer["BookFromHere"]
                     </a>
                 </div>
             </div>
