@@ -371,42 +371,32 @@ body {
   background: rgba(255, 193, 7, 0.25);
 }
 
-/* CSS Stylized Logo */
-.logo-wrapper {
+/* Static Image-Based Logo Styles */
+.static-logo-container {
   display: flex;
   align-items: center;
-  font-family: 'Cairo', sans-serif;
-  cursor: pointer;
-  user-select: none;
-  animation: logoSlide 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  transition: all 0.3s ease;
 }
 
-.logo-icon {
-  font-size: 1.8rem;
-  background: linear-gradient(135deg, #005eb8, #38bdf8);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 4px rgba(0, 94, 184, 0.2));
+.static-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  /* Removes white square background if drawing is dark on white */
+  mix-blend-mode: multiply;
+  filter: contrast(1.1) brightness(1.05);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.logo-text {
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: #2d3748;
-  letter-spacing: -1px;
+.static-logo-container:hover .static-logo {
+  transform: scale(1.1) rotate(-5deg);
 }
 
-[data-theme="dark"] .logo-text {
-  color: #ffffff;
-}
-
-.text-primary-go {
-  color: #005eb8;
-}
-
-[data-theme="dark"] .text-primary-go {
-  color: #38bdf8;
+[data-theme="dark"] .static-logo {
+  /* Invert colors for dark mode if drawing is dark */
+  filter: invert(1) brightness(2) contrast(1.2);
+  mix-blend-mode: screen;
+  /* Blends white parts with dark bg */
 }
 
 @keyframes logoSlide {
