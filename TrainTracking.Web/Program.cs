@@ -73,6 +73,22 @@ try
     builder.Services.AddScoped<IEmailService, MockEmailService>();
     builder.Services.AddScoped<ITripService, TripService>();
 
+    // Localization Services
+    builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+    builder.Services.AddControllersWithViews()
+        .AddViewLocalization()
+        .AddDataAnnotationsLocalization();
+
+    builder.Services.Configure<RequestLocalizationOptions>(options =>
+    {
+        var supportedCultures = new[] { "ar-KW", "en-US" };
+        options.SetDefaultCulture(supportedCultures[0])
+               .AddSupportedCultures(supportedCultures)
+               .AddSupportedUICultures(supportedCultures);
+        
+        options.RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localization.CookieRequestCultureProvider());
+    });
+
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.
@@ -81,6 +97,9 @@ try
         app.UseExceptionHandler("/Home/Error");
         app.UseHsts();
     }
+
+    // Enable Localization Middleware
+    app.UseRequestLocalization();
 
     app.UseStaticFiles();
     app.UseRouting();

@@ -1,6 +1,12 @@
-﻿@using TrainTracking.Domain.Enums
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@using System.Globalization
+@using TrainTracking.Domain.Enums
 @inject TrainTracking.Application.Interfaces.IBookingRepository BookingRepo
 @{
+    var currentCulture = CultureInfo.CurrentUICulture.Name;
+    var isRTL = currentCulture.StartsWith("ar");
+    var dir = isRTL ? "rtl" : "ltr";
     int points = 0;
     if (User.Identity?.IsAuthenticated == true)
     {
@@ -13,12 +19,19 @@
     }
 }
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="@currentCulture" dir="@dir">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - KuwGo</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    @if (isRTL)
+    {
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    }
+    else
+    {
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    }
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TrainTracking.Web.styles.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -54,39 +67,58 @@
                 </a>
 
                 <!-- Mobile Toggle button -->
-                <button class="navbar-toggler border-0 shadow-none d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                <div class="d-flex align-items-center d-lg-none">
+                     <!-- Language Toggle Mobile -->
+                    <form asp-controller="Culture" asp-action="SetLanguage" method="post" class="me-2">
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <button type="submit" name="culture" value="@(isRTL ? "en-US" : "ar-KW")" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold">
+                            @(isRTL ? "EN" : "عربي")
+                        </button>
+                    </form>
+                    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
 
                 <!-- Desktop Desktop Navigation -->
                 <div class="collapse navbar-collapse d-none d-lg-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">الرئيسية</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Trips" asp-action="Index">الرحلات</a></li>
-                        <li class="nav-item"><a class="nav-link text-success fw-bold" asp-controller="Trips" asp-action="Live"><i class="fas fa-satellite-dish me-1"></i> التتبع الحي</a></li>
+                    <ul class="navbar-nav @(isRTL ? "flex-grow-1" : "flex-grow-1 ms-4")">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">@(isRTL ? "الرئيسية" : "Home")</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Trips" asp-action="Index">@(isRTL ? "الرحلات" : "Trips")</a></li>
+                        <li class="nav-item"><a class="nav-link text-success fw-bold" asp-controller="Trips" asp-action="Live"><i class="fas fa-satellite-dish me-1"></i> @(isRTL ? "التتبع الحي" : "Live Tracking")</a></li>
                         @if (User.IsInRole("Admin"))
                         {
-                            <li class="nav-item"><a class="nav-link text-primary fw-bold" asp-controller="Admin" asp-action="Index"><i class="fas fa-tools me-1"></i> لوحة التحكم</a></li>
+                            <li class="nav-item"><a class="nav-link text-primary fw-bold" asp-controller="Admin" asp-action="Index"><i class="fas fa-tools me-1"></i> @(isRTL ? "لوحة التحكم" : "Dashboard")</a></li>
                         }
                     </ul>
                     <ul class="navbar-nav align-items-center">
+                         <!-- Language Switcher Desktop -->
+                        <li class="nav-item @(isRTL ? "me-3" : "ms-3")">
+                            <form asp-controller="Culture" asp-action="SetLanguage" method="post" class="m-0">
+                                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                <div class="btn-group btn-group-sm rounded-pill overflow-hidden shadow-sm border">
+                                    <button type="submit" name="culture" value="ar-KW" class="btn @(isRTL ? "btn-primary" : "btn-white") border-0 px-3 fw-bold">AR</button>
+                                    <button type="submit" name="culture" value="en-US" class="btn @(!isRTL ? "btn-primary" : "btn-white") border-0 px-3 fw-bold">EN</button>
+                                </div>
+                            </form>
+                        </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item">
                                 <a class="nav-link position-relative highlight-link pe-3" asp-controller="Bookings" asp-action="MyBookings">
-                                    <i class="fas fa-ticket-alt me-1"></i> حجوزاتي
+                                    <i class="fas fa-ticket-alt @(isRTL ? "me-1" : "ms-1")"></i> @(isRTL ? "حجوزاتي" : "My Bookings")
                                 </a>
                             </li>
 
-                            <li class="nav-item d-flex align-items-center mx-2">
-                                <a asp-controller="Bookings" asp-action="Rewards" class="points-standalone-btn shadow-sm rounded-circle d-flex align-items-center justify-content-center text-decoration-none" style="width: 42px; height: 42px;" title="رصيد نقاطي: @points">
+                            <li class="nav-item d-flex align-items-center @(isRTL ? "me-2" : "ms-2")">
+                                <a asp-controller="Bookings" asp-action="Rewards" class="points-standalone-btn shadow-sm rounded-circle d-flex align-items-center justify-content-center text-decoration-none" style="width: 42px; height: 42px;" title="@(isRTL ? "رصيد نقاطي" : "My Points"): @points">
                                     <div class="coin-glow m-0">
                                         <i class="fas fa-dollar-sign text-warning"></i>
                                     </div>
                                 </a>
                             </li>
 
-                            <li class="nav-item d-flex align-items-center ms-3">
+                            <li class="nav-item d-flex align-items-center @(isRTL ? "ms-3" : "me-3")">
                                 <div class="user-capsule d-flex align-items-center p-1 rounded-pill shadow-sm">
                                     <div class="d-flex align-items-center px-2">
                                         <div class="user-avatar-sm" title="@User.Identity?.Name">
@@ -95,7 +127,7 @@
                                     </div>
                                     <div class="vr h-50 my-auto bg-secondary opacity-25 mx-0"></div>
                                     <form asp-controller="Account" asp-action="Logout" method="post" class="d-flex align-items-center m-0">
-                                        <button type="submit" onclick="sessionStorage.removeItem('locationChecked')" class="btn btn-sm btn-icon-only text-danger-soft rounded-circle" title="تسجيل الخروج">
+                                        <button type="submit" onclick="sessionStorage.removeItem('locationChecked')" class="btn btn-sm btn-icon-only text-danger-soft rounded-circle" title="@(isRTL ? "تسجيل الخروج" : "Logout")">
                                             <i class="fas fa-power-off"></i>
                                         </button>
                                     </form>
@@ -104,11 +136,11 @@
                         }
                         else
                         {
-                            <li class="nav-item"><a class="nav-link bg-primary text-white px-4 rounded-pill shadow-sm" asp-controller="Account" asp-action="Login">دخول</a></li>
+                            <li class="nav-item"><a class="nav-link bg-primary text-white px-4 rounded-pill shadow-sm" asp-controller="Account" asp-action="Login">@(isRTL ? "دخول" : "Login")</a></li>
                         }
                         
-                        <li class="nav-item ms-2">
-                           <button id="themeToggle" class="btn btn-link nav-link theme-toggle-btn" title="تغيير المظهر">
+                        <li class="nav-item @(isRTL ? "ms-2" : "me-2")">
+                           <button id="themeToggle" class="btn btn-link nav-link theme-toggle-btn" title="@(isRTL ? "تغيير المظهر" : "Toggle Theme")">
                                 <i class="fas fa-moon"></i>
                             </button>
                         </li>
@@ -118,7 +150,7 @@
         </nav>
 
         <!-- Premium Mobile Sidebar (Offcanvas) -->
-        <div class="offcanvas offcanvas-start border-0 sidebar-offcanvas d-lg-none" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+        <div class="offcanvas offcanvas-@(isRTL ? "start" : "end") border-0 sidebar-offcanvas d-lg-none" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
             <div class="offcanvas-header border-bottom py-4">
                 <div class="d-flex align-items-center">
                     <div class="static-logo-container">
@@ -133,24 +165,24 @@
                 {
                     <div class="sidebar-user-profile p-4 border-bottom bg-light bg-opacity-10">
                         <div class="d-flex align-items-center mb-3">
-                            <div class="user-avatar-lg me-3">
+                            <div class="user-avatar-lg @(isRTL ? "me-3" : "ms-3")">
                                 <i class="fas fa-user fa-2x"></i>
                             </div>
                             <div>
                                 <h6 class="mb-0 fw-bold">@User.Identity?.Name</h6>
-                                <span class="text-muted small">@points نقطة</span>
+                                <span class="text-muted small">@points @(isRTL ? "نقطة" : "Points")</span>
                             </div>
                         </div>
                         <div class="row g-2">
                             <div class="col-6">
                                 <a asp-controller="Bookings" asp-action="Rewards" class="btn btn-outline-warning w-100 btn-sm rounded-pill">
-                                    <i class="fas fa-coins me-1"></i> النقاط
+                                    <i class="fas fa-coins @(isRTL ? "me-1" : "ms-1")"></i> @(isRTL ? "النقاط" : "Points")
                                 </a>
                             </div>
                             <div class="col-6">
                                 <form asp-controller="Account" asp-action="Logout" method="post">
                                     <button type="submit" class="btn btn-outline-danger w-100 btn-sm rounded-pill">
-                                        <i class="fas fa-sign-out-alt me-1"></i> خروج
+                                        <i class="fas fa-sign-out-alt @(isRTL ? "me-1" : "ms-1")"></i> @(isRTL ? "خروج" : "Logout")
                                     </button>
                                 </form>
                             </div>
@@ -161,38 +193,38 @@
                 {
                     <div class="p-4 border-bottom bg-light bg-opacity-10">
                         <a asp-controller="Account" asp-action="Login" class="btn btn-primary w-100 rounded-pill shadow-sm">
-                            <i class="fas fa-sign-in-alt me-1"></i> دخول للأعضاء
+                            <i class="fas fa-sign-in-alt @(isRTL ? "me-1" : "ms-1")"></i> @(isRTL ? "دخول للأعضاء" : "Member Login")
                         </a>
                     </div>
                 }
 
                 <!-- Navigation List -->
-                <div class="list-group list-group-flush py-2">
+                <div class="list-group list-group-flush py-2 text-@(isRTL ? "start" : "start")">
                     <a asp-controller="Home" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
-                        <div class="sidebar-icon-box me-3 text-primary"><i class="fas fa-home"></i></div>
-                        الرئيسية
+                        <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-primary"><i class="fas fa-home"></i></div>
+                        @(isRTL ? "الرئيسية" : "Home")
                     </a>
                     <a asp-controller="Trips" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
-                        <div class="sidebar-icon-box me-3 text-info"><i class="fas fa-train"></i></div>
-                        الرحلات
+                        <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-info"><i class="fas fa-train"></i></div>
+                        @(isRTL ? "الرحلات" : "Trips")
                     </a>
                     <a asp-controller="Trips" asp-action="Live" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center text-success fw-bold">
-                        <div class="sidebar-icon-box me-3 text-success"><i class="fas fa-map-marker-alt"></i></div>
-                        التتبع الحي
+                        <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-success"><i class="fas fa-map-marker-alt"></i></div>
+                        @(isRTL ? "التتبع الحي" : "Live Tracking")
                     </a>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         <a asp-controller="Bookings" asp-action="MyBookings" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
-                            <div class="sidebar-icon-box me-3 text-warning"><i class="fas fa-ticket-alt"></i></div>
-                            حجوزاتي
+                            <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-warning"><i class="fas fa-ticket-alt"></i></div>
+                            @(isRTL ? "حجوزاتي" : "My Bookings")
                         </a>
                     }
                     @if (User.IsInRole("Admin"))
                     {
                         <div class="dropdown-divider mx-4 my-2"></div>
                         <a asp-controller="Admin" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center text-primary fw-bold">
-                            <div class="sidebar-icon-box me-3 text-primary"><i class="fas fa-tools"></i></div>
-                            لوحة التحكم
+                            <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-primary"><i class="fas fa-tools"></i></div>
+                            @(isRTL ? "لوحة التحكم" : "Dashboard")
                         </a>
                     }
                 </div>
@@ -200,7 +232,7 @@
                 <!-- Footer Section (Theme Toggle) -->
                 <div class="mt-auto p-4 border-top">
                     <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded-pill">
-                        <span class="ms-3 small fw-bold">تغيير المظهر</span>
+                        <span class="ms-3 small fw-bold">@(isRTL ? "تغيير المظهر" : "Appearance")</span>
                         <button id="themeToggleMobile" class="btn theme-toggle-btn rounded-circle" style="width: 35px; height: 35px;">
                             <i class="fas fa-moon"></i>
                         </button>
