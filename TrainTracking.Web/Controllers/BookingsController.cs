@@ -286,14 +286,14 @@ namespace TrainTracking.Web.Controllers
                     var localIp = GetLocalIpAddress();
                     if (!string.IsNullOrEmpty(localIp))
                     {
-                        // FORCE Port 5244 (HTTP) because 7164 is HTTPS and usually rejects external non-cert connections
+                        // FORCE Port 5244 (HTTP) for local testing access
                         host = $"{localIp}:5244";
                         scheme = "http"; 
                     }
                 }
                 catch 
                 {
-                    // Fallback to original host if detection fails
+                    // Fallback to original host if detection fails, completely safe.
                 }
             }
 
@@ -301,7 +301,7 @@ namespace TrainTracking.Web.Controllers
             var qrUrl = $"{baseUrl}/Bookings/TicketDetails/{booking.Id}";
 
             var pdf = _ticketGenerator.GenerateTicketPdf(booking, qrUrl);
-            return File(pdf, "application/pdf", $"Ticket-{booking.Id.ToString().Substring(0, 8)}.pdf");
+            return File(pdf, "application/pdf", $"Ticket-{booking.Id.ToString()[..8]}.pdf");
         }
 
         private string? GetLocalIpAddress()

@@ -140,6 +140,12 @@ namespace TrainTracking.Web.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        private async Task PrepareTripDropdowns()
+        {
+            ViewBag.Trains = await _trainRepository.GetAllAsync();
+            ViewBag.Stations = await _stationRepository.GetAllAsync();
+        }
         public async Task<IActionResult> EditTrip(Guid id)
         {
             var trip = await _tripRepository.GetTripWithStationsAsync(id);
