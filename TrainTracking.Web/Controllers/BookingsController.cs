@@ -252,10 +252,17 @@ namespace TrainTracking.Web.Controllers
             return View();
         }
 
-        public async Task<IActionResult> DownloadTicket(Guid bookingId)
+        [Authorize]
+        public async Task<IActionResult> DownloadTicket(Guid id)
         {
-            var booking = await _bookingRepository.GetByIdAsync(bookingId);
+            var booking = await _bookingRepository.GetByIdAsync(id);
             if (booking == null) return NotFound();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (booking.UserId != userId && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
 
             var request = HttpContext.Request;
             var host = request.Host.Value;

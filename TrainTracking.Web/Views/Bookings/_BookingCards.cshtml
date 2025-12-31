@@ -88,7 +88,7 @@
                     <div class="d-grid gap-2">
                         @if (booking.Status == BookingStatus.Confirmed)
                         {
-                            <a asp-action="DownloadTicket" asp-route-bookingId="@booking.Id" class="btn btn-outline-primary rounded-pill fw-bold">
+                            <a asp-action="DownloadTicket" asp-route-id="@booking.Id" class="btn btn-outline-primary rounded-pill fw-bold">
                                 <i class="fas fa-download me-2"></i> تحميل التذكرة
                             </a>
                             @if (booking.Trip != null && booking.Trip.DepartureTime > DateTimeOffset.Now)

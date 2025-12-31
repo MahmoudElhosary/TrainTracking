@@ -8,8 +8,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إنشاء حساب - KuwGo</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        (function () {
+            const theme = document.cookie.split('; ').find(row => row.startsWith('theme='))?.split('=')[1];
+            if (theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+        })();
+    </script>
+    <link href="/css/site.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #005eb8;
@@ -18,18 +25,27 @@
             --input-bg: #f8f9fa;
         }
 
+        /* Sync with global theme variables if available */
+        [data-theme="dark"] {
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(255, 255, 255, 0.05);
+        }
+
         body {
             font-family: 'Cairo', sans-serif;
             margin: 0;
             height: 100vh;
             display: flex;
             overflow: hidden; 
+            background-color: var(--bg-color, #f3f6f9);
+            color: var(--text-color, #2d3748);
         }
 
         /* 1. Form Side (Right) */
         .form-section {
             flex: 1;
-            background: white;
+            background: var(--card-bg, white);
             display: flex;
             align-items: center;
             justify-content: center;

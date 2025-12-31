@@ -42,17 +42,6 @@ body {
   --accent-color: #005eb8;
 }
 
-/* GLOBAL HELPERS & OVERRIDES */
-[data-theme="dark"] .bg-white {
-  background-color: var(--card-bg) !important;
-  color: var(--text-color) !important;
-}
-
-[data-theme="dark"] .bg-light {
-  background-color: rgba(255, 255, 255, 0.05) !important;
-  color: var(--text-color) !important;
-}
-
 [data-theme="dark"] {
   /* Deep Void Blue & Glass Accents */
   --bg-color: #0b0f19;
@@ -80,6 +69,42 @@ body {
   /* Soft Blue Glow */
   --accent-color: #38bdf8;
   /* Cyan-Blue for better contrast */
+}
+
+/* GLOBAL HELPERS & OVERRIDES FOR DARK MODE */
+[data-theme="dark"] .text-dark {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .text-muted {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .bg-light {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-color) !important;
+}
+
+[data-theme="dark"] .list-group-item {
+  background-color: transparent !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .list-group-item-action:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: var(--accent-color) !important;
+}
+
+[data-theme="dark"] .border-bottom,
+[data-theme="dark"] .border-top,
+[data-theme="dark"] .border {
+  border-color: var(--border-color) !important;
 }
 
 body {
@@ -827,4 +852,71 @@ body {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   border: 1px solid var(--border-color);
+}/* ================= DARK MODE SPECIFIC FIXES ================= */
+[data-theme="dark"] .table {
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .table thead th {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--accent-color);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .table tbody tr {
+    background-color: transparent;
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="dark"] .table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+/* My Bookings Tab Highlighting */
+[data-theme="dark"] .nav-pills .nav-link {
+    color: var(--muted-text);
+}
+
+[data-theme="dark"] .nav-pills .nav-link:hover {
+    color: var(--text-color);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Sidebar Hamburger Toggle Fix */
+[data-theme="dark"] .btn-link {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .navbar-toggler-icon {
+    filter: invert(1) brightness(2);
+}
+
+/* Auth Pages Dark Mode Sync */
+[data-theme="dark"] .form-section {
+    background: #0b0f19 !important;
+    color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .auth-wrapper .title {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .auth-wrapper .subtitle {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .form-control {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .form-label {
+    color: #ffffff !important;
 }

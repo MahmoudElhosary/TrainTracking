@@ -18,7 +18,7 @@
                 <div class="d-grid gap-2 col-8 mx-auto">
                     @if (ViewBag.BookingId != null)
                     {
-                        <a asp-action="DownloadTicket" asp-route-bookingId="@ViewBag.BookingId" class="btn btn-success btn-lg rounded-pill shadow-sm mb-2">
+                        <a asp-action="DownloadTicket" asp-route-id="@ViewBag.BookingId" class="btn btn-success btn-lg rounded-pill shadow-sm mb-2">
                             <i class="fas fa-file-pdf me-2"></i> تحميل التذكرة (PDF)
                         </a>
                     }

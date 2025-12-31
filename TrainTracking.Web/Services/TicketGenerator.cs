@@ -32,12 +32,13 @@ namespace TrainTracking.Web.Services
                     page.Size(PageSizes.A5.Landscape());
                     page.Margin(0);
                     page.PageColor(Colors.White);
-                    // Use Segoe UI for better Arabic support on Windows, fallback to Arial
-                    page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Segoe UI"));
+                    // Standard Arial for universal support (Windows/Linux)
+                    page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Arial"));
 
                     page.Content().Element(content =>
                     {
-                        content.Column(col => 
+                        // Proper QuestPDF RTL method
+                        content.ContentFromRightToLeft().Column(col => 
                         {
                             // Header Section
                             col.Item().Height(80).Background("#1e3c72").PaddingHorizontal(20).Row(row =>
