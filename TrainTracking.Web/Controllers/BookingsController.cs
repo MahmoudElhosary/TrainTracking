@@ -264,9 +264,9 @@ namespace TrainTracking.Web.Controllers
             // Allow if:
             // 1. User is Admin
             // 2. User is the Owner (Logged in)
-            // 3. Booking is Anonymous (Anyone with the link/GUID can download - acceptable trade-off for anonymous UX)
+            // 3. Booking is Anonymous OR UserId is empty (Robustness fix for legacy/glitched bookings)
             bool isOwner = (isAuthenticated && booking.UserId == userId);
-            bool isAnonymousBooking = booking.UserId == "Anonymous";
+            bool isAnonymousBooking = string.IsNullOrEmpty(booking.UserId) || booking.UserId == "Anonymous";
             bool isAdmin = isAuthenticated && User.IsInRole("Admin");
 
             if (!isOwner && !isAnonymousBooking && !isAdmin)
