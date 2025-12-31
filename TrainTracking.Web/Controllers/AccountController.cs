@@ -25,12 +25,30 @@ namespace TrainTracking.Web.Controllers
             var result = await _signInManager.PasswordSignInAsync(email, password, rememberMe, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                Console.WriteLine($"[KuwGo] Login SUCCESS for user: {email}");
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
+                {
+                    Console.WriteLine($"[KuwGo] Admin Login SUCCESS: {email}. Redirecting to Admin Dashboard.");
+                    return RedirectToAction("Index", "Admin");
+                }
+                
+                Console.WriteLine($"[KuwGo] User Login SUCCESS: {email}. Redirecting to Home.");
                 return RedirectToAction("Index", "Home");
             }
+
+            // Diagnostic Logging
+            var existingUser = await _userManager.FindByEmailAsync(email);
+            if (existingUser == null)
+            {
+                Console.WriteLine($"[KuwGo] Login FAILED: User '{email}' not found.");
+            }
+            else 
+            {
+                var roles = await _userManager.GetRolesAsync(existingUser);
+                Console.WriteLine($"[KuwGo] Login FAILED: User '{email}' exists with roles [{string.Join(", ", roles)}]. Password mismatch or account lock.");
+            }
             
-            Console.WriteLine($"[KuwGo] Login FAILED for user: {email}. Result: {result}");
-            ModelState.AddModelError(string.Empty, "محاولة تسجيل دخول غير ناجحة.");
+            ModelState.AddModelError(string.Empty, "محاولة تسجيل دخول غير ناجحة. تأكد من البريد الإلكتروني وكلمة المرور.");
             return View();
         }
 
