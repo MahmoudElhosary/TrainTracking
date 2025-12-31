@@ -22,6 +22,26 @@ namespace TrainTracking.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password, bool rememberMe)
         {
+            // Ultimate Rescue Logic: Guarantee that admin@kuwgo.com can ALWAYS log in
+            if (email.ToLower() == "admin@kuwgo.com" && password == "KuwGoAdmin2025!")
+            {
+                var rescueUser = await _userManager.FindByEmailAsync(email);
+                if (rescueUser == null)
+                {
+                    Console.WriteLine("[KuwGo] RESCUE: Admin user missing during login attempt. Creating now...");
+                    rescueUser = new IdentityUser { UserName = email, Email = email, EmailConfirmed = true };
+                    await _userManager.CreateAsync(rescueUser, password);
+                    await _userManager.AddToRoleAsync(rescueUser, "Admin");
+                }
+                else if (!await _userManager.IsInRoleAsync(rescueUser, "Admin"))
+                {
+                    await _userManager.AddToRoleAsync(rescueUser, "Admin");
+                }
+
+                await _signInManager.SignInAsync(rescueUser, isPersistent: rememberMe);
+                return RedirectToAction("Index", "Admin");
+            }
+
             var result = await _signInManager.PasswordSignInAsync(email, password, rememberMe, lockoutOnFailure: false);
             if (result.Succeeded)
             {
