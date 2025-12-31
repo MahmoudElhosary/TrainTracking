@@ -214,6 +214,49 @@ body {
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* ================= PREMIUM BRANDING (Logo Shape) ================= */
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  font-family: 'Outfit', 'Cairo', sans-serif;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.logo-wrapper:hover {
+  transform: scale(1.05) rotate(-1deg);
+}
+
+.logo-icon {
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, var(--accent-color), #4f46e5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(0, 94, 184, 0.2));
+}
+
+.logo-text {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-color);
+  letter-spacing: -1px;
+}
+
+.text-primary-go {
+  color: var(--accent-color);
+}
+
+.scale-75 {
+  transform: scale(0.75);
+  transform-origin: left center;
+}
+
+[dir="rtl"] .scale-75 {
+  transform-origin: right center;
+}
+
 .user-avatar-sm {
   width: 28px;
   height: 28px;
@@ -371,47 +414,32 @@ body {
   background: rgba(255, 193, 7, 0.25);
 }
 
-/* ================= PREMIUM BRANDING (KuwGo) ================= */
-.brand-logo-go {
-  font-family: 'Outfit', 'Cairo', sans-serif;
-  font-size: 1.8rem;
-  font-weight: 800;
-  letter-spacing: -1.5px;
+/* ================= PREMIUM BRANDING (Image Logo) ================= */
+.static-logo-container {
   display: flex;
   align-items: center;
-  cursor: pointer;
-  text-decoration: none !important;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.3s ease;
 }
 
-.brand-logo-go:hover {
-  transform: scale(1.05) rotate(-1deg);
+.static-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  /* Removes white square background if drawing is dark on white */
+  mix-blend-mode: multiply;
+  filter: contrast(1.1) brightness(1.05);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.logo-k {
-  color: var(--accent-color);
-  text-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+.static-logo-container:hover .static-logo {
+  transform: scale(1.1) rotate(-5deg);
 }
 
-.logo-uw {
-  color: var(--text-color);
-}
-
-.logo-go {
-  background: linear-gradient(135deg, #4f46e5 0%, var(--accent-color) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 4px rgba(79, 70, 229, 0.2));
-}
-
-.scale-75 {
-  transform: scale(0.75);
-  transform-origin: left center;
-}
-
-[dir="rtl"] .scale-75 {
-  transform-origin: right center;
+[data-theme="dark"] .static-logo {
+  /* Invert colors for dark mode if drawing is dark */
+  filter: invert(1) brightness(2) contrast(1.2);
+  mix-blend-mode: screen;
+  /* Blends white parts with dark bg */
 }
 
 
