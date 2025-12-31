@@ -600,4 +600,89 @@ body {
 
 .text-success {
   color: #28a745 !important;
+} 
+ /* ================= PERSISTENT DESKTOP SIDEBAR ================= */
+.sidebar-desktop {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 280px;
+  background-color: var(--navbar-bg);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  z-index: 1030;
+  padding-top: 1rem;
+  transition: all 0.4s ease;
+  display: flex !important;
+  flex-direction: column;
+}
+
+/* Position Sidebar: Right for RTL (Arabic), Left for LTR (English) */
+[dir="ltr"] .sidebar-desktop {
+  left: 0;
+  border-right: 1px solid var(--border-color);
+  border-left: none;
+}
+
+[dir="rtl"] .sidebar-desktop {
+  right: 0;
+  border-left: 1px solid var(--border-color);
+  border-right: none;
+}
+
+/* Adjust Main Content to make room for Sidebar on Desktop */
+@media (min-width: 992px) {
+  [dir="ltr"] .main-wrapper-sidebar {
+    margin-left: 280px;
+    margin-right: 0;
+  }
+  [dir="rtl"] .main-wrapper-sidebar {
+    margin-right: 280px;
+    margin-left: 0;
+  }
+}
+
+.sidebar-branding {
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sidebar-desktop .nav-link {
+  margin: 0.25rem 1rem;
+  padding: 0.75rem 1rem;
+  color: var(--text-color) !important;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.sidebar-desktop .nav-link i {
+  width: 24px;
+  font-size: 1.1rem;
+}
+
+.sidebar-desktop .nav-link:hover {
+  background: rgba(0, 94, 184, 0.08);
+  color: var(--accent-color) !important;
+  transform: translateX(5px);
+}
+
+[dir="rtl"] .sidebar-desktop .nav-link:hover {
+  transform: translateX(-5px);
+}
+
+.sidebar-user-card {
+  margin: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-color);
 }
